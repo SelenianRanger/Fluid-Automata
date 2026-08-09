@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://cpdoxjk3cd4fk"]
+
+[ext_resource type="Script" uid="uid://qnb8v5n7tq8s" path="res://scripts/Grid.gd" id="1_6e84v"]
+
+[node name="Node2D" type="Node2D" unique_id=1808051195]
+
+[node name="Grid" type="Node" parent="." unique_id=1509604413]
+script = ExtResource("1_6e84v")
+
+[node name="Timer" type="Timer" parent="Grid" unique_id=1229513438]
+wait_time = 0.33
+autostart = true
+
+[connection signal="timeout" from="Grid/Timer" to="Grid" method="_on_timer_timeout"]
