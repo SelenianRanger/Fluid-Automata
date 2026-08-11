@@ -15,15 +15,13 @@ texture = ExtResource("3_4vge2")
 [sub_resource type="TileSet" id="TileSet_keve6"]
 sources/0 = SubResource("TileSetAtlasSource_4vge2")
 
-[node name="GridScn" type="Node2D" unique_id=1808051195]
+[node name="Game" type="Node2D" unique_id=1808051195]
 script = ExtResource("1_j7wrs")
-grid_size = Vector2i(100, 100)
 
 [node name="Grid" type="Node" parent="." unique_id=1509604413]
 script = ExtResource("1_4vge2")
 
 [node name="Timer" type="Timer" parent="Grid" unique_id=1229513438]
-wait_time = 0.1
 autostart = true
 
 [node name="Rules" type="Node" parent="Grid" unique_id=451913964]

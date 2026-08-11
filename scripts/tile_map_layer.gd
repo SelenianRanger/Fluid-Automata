@@ -9,9 +9,20 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	pass
 
-func _on_grid_updated(grid_delta) -> void:
-	for i in range(1, grid_delta.size() - 1):
-		for j in range(1, grid_delta[i].size() - 1):
-			if(grid_delta[i][j] == -1):
+func _on_grid_updated() -> void:
+	var grid = Globals.grid
+	var section_grid = Globals.section_grid
+	for sub_i in range(section_grid.size()):
+		for sub_j in range(section_grid[sub_i].size()):
+			if(section_grid[sub_i][sub_j] == 0):
 				continue
-			set_cell(Vector2i(i-1, j-1), 0, Vector2i(grid_delta[i][j], 0))
+			if(section_grid[sub_i][sub_j] > 1):
+				section_grid[sub_i][sub_j] = 1
+				continue
+			var i1 = max(1, sub_i * Globals.section_size[0])
+			var i2 = min(Globals.grid_size[0] - 1, i1 + Globals.section_size[0])
+			var j1 = max(1, sub_j * Globals.section_size[1])
+			var j2 = min(Globals.grid_size[1] - 1, j1 + Globals.section_size[1])
+			for i in range(i1, i2):
+				for j in range(j1, j2):
+					set_cell(Vector2i(i-1, j-1), 0, Vector2i(grid[i][j], 0))
