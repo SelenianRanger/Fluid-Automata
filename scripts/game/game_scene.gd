@@ -18,7 +18,7 @@ func apply_cursor(pos, color):
 				var y = pos.y + j
 				if(y < 1 || y > Globals.grid_size.y - 2):
 					continue
-				if(cursor[Globals.getPackedIndex(Vector2i(5, 5), i + 2, j + 2)] == 0):
+				if(cursor[Globals.get_packed_index(Vector2i(5, 5), i + 2, j + 2)] == 0):
 					continue
 				$Grid.set_tile(x, y, color)
 				$TileMapLayer.set_cell(Vector2i(x, y) - Vector2i.ONE, 0, Vector2i(color, 0))
@@ -49,10 +49,32 @@ func _input(event: InputEvent) -> void:
 	elif(Input.is_action_pressed("cell_erase")):
 		apply_cursor(mouse_coords, 0)
 
+func update_camera() -> void:
+	$Camera2D.update_camera()
+
 func _on_pause_toggled(toggled_on: bool) -> void:
 	toggle_pause()
-
 
 func _on_speed_changed(value: float) -> void:
 	Globals.update_speed = value
 	$Grid/Timer.wait_time = 1.0 / Globals.update_speed
+
+func _on_reset_pressed() -> void:
+	$Grid.reset_grid()
+
+func load_map() -> void:
+	$LoadMapDialog.popup_file_dialog()
+
+func save_map() -> void:
+	$SaveMapDialog.popup_file_dialog()
+
+func _on_load_map_from_file(path: String) -> void:
+	var data = FileAccess.get_file_as_bytes(path)
+	if(data.size() != Globals.grid.size()):
+		return
+	$Grid.reset_grid(data)
+
+func _on_save_map_to_file(path: String) -> void:
+	var file = FileAccess.open(path, FileAccess.WRITE)
+	file.store_buffer(Globals.grid)
+	file.close()

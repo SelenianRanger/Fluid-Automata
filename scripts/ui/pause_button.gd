@@ -12,7 +12,3 @@ func _process(delta: float) -> void:
 
 func _on_pause_changed() -> void:
 	set_pressed_no_signal(Globals.is_paused)
-	if(Globals.is_paused):
-		text = "⏸️"
-	else:
-		text = "▶️"

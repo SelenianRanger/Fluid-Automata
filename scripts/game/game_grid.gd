@@ -19,7 +19,7 @@ func update_tile(x, y) -> int:
 	return 0
 
 func set_tile(x, y, type):
-	var index = Globals.getPackedIndex(Globals.grid_size, x, y)
+	var index = Globals.get_packed_index(Globals.grid_size, x, y)
 	if(grid[index] == type):
 		return
 	grid[index] = type
@@ -29,14 +29,18 @@ func mark_subsection(x, y):
 	var section_grid_size = Globals.grid_size / Globals.section_size
 	var sub_i = x / Globals.section_size[0]
 	var sub_j = y / Globals.section_size[1]
-	section_grid[Globals.getPackedIndex(section_grid_size, sub_i, sub_j)] = 1
+	section_grid[Globals.get_packed_index(section_grid_size, sub_i, sub_j)] = 1
 	
 	for index in section_grid_neighbors[x][y]:
-		if(section_grid[Globals.getPackedIndex(section_grid_size, index.x, index.y)] != 1):
-			section_grid[Globals.getPackedIndex(section_grid_size, index.x, index.y)] = 2
+		if(section_grid[Globals.get_packed_index(section_grid_size, index.x, index.y)] != 1):
+			section_grid[Globals.get_packed_index(section_grid_size, index.x, index.y)] = 2
 
-func reset_grid() -> void:
-	grid.fill(0)
+func reset_grid(fill : PackedByteArray = []) -> void:
+	if(fill.size() == 0):
+		grid.fill(0)
+	else:
+		for i in range(grid.size()):
+			grid[i] = fill[i]
 	section_grid.fill(1)
 	emit_signal("grid_updated")
 
@@ -82,7 +86,7 @@ func update_section_neighbors(section_id) -> void:
 	var section_grid_size = Globals.grid_size / Globals.section_size
 	var sub_i = section_id / section_grid_size.y
 	var sub_j = section_id % section_grid_size.y
-	var index = Globals.getPackedIndex(section_grid_size, sub_i, sub_j)
+	var index = Globals.get_packed_index(section_grid_size, sub_i, sub_j)
 	if(section_grid[index] != 1):
 		return
 	var i1 = max(1, sub_i * Globals.section_size[0])
@@ -91,20 +95,20 @@ func update_section_neighbors(section_id) -> void:
 	var j2 = min(Globals.grid_size[1] - 1, j1 + Globals.section_size[1])
 	for x in range(i1, i2):
 		for y in range(j1, j2):
-			index = Globals.getPackedIndex(Globals.grid_size, x, y)
+			index = Globals.get_packed_index(Globals.grid_size, x, y)
 			neighbors[index] = 0
 			for i in range(-1, 2):
 				for j in range(-1, 2):
 					if( i == 0 and j == 0 ):
 						continue
-					var index2 = Globals.getPackedIndex(Globals.grid_size, x + i, y + j)
+					var index2 = Globals.get_packed_index(Globals.grid_size, x + i, y + j)
 					neighbors[index] += grid[index2]
 
 func update_section(section_id) -> void:
 	var section_grid_size = Globals.grid_size / Globals.section_size
 	var sub_i = section_id / section_grid_size.y
 	var sub_j = section_id % section_grid_size.y
-	var index = Globals.getPackedIndex(section_grid_size, sub_i, sub_j)
+	var index = Globals.get_packed_index(section_grid_size, sub_i, sub_j)
 	if(section_grid[index] != 1):
 		return
 	var tiles_changed = 0

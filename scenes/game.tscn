@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://cpdoxjk3cd4fk"]
 
-[ext_resource type="Script" uid="uid://qnb8v5n7tq8s" path="res://scripts/game/grid.gd" id="1_4vge2"]
-[ext_resource type="Script" uid="uid://dt2jld17dltf8" path="res://scripts/game/gameScn.gd" id="1_j7wrs"]
+[ext_resource type="Script" uid="uid://qnb8v5n7tq8s" path="res://scripts/game/game_grid.gd" id="1_4vge2"]
+[ext_resource type="Script" uid="uid://dt2jld17dltf8" path="res://scripts/game/game_scene.gd" id="1_j7wrs"]
 [ext_resource type="Texture2D" uid="uid://cajac07k1oj7b" path="res://assets/tiles.png" id="3_4vge2"]
-[ext_resource type="Script" uid="uid://b70dvg4ur8qfd" path="res://scripts/game/tile_map_game.gd" id="4_4vge2"]
-[ext_resource type="Script" uid="uid://w0kccclfcilw" path="res://scripts/game/camera_2d.gd" id="6_j7wrs"]
+[ext_resource type="Script" uid="uid://b70dvg4ur8qfd" path="res://scripts/game/game_tile_map.gd" id="4_4vge2"]
+[ext_resource type="Script" uid="uid://w0kccclfcilw" path="res://scripts/game/game_camera.gd" id="6_j7wrs"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4vge2"]
 texture = ExtResource("3_4vge2")
@@ -31,6 +31,7 @@ tile_set = SubResource("TileSet_keve6")
 script = ExtResource("4_4vge2")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=456041188]
+editor_draw_screen = false
 script = ExtResource("6_j7wrs")
 
 [connection signal="grid_updated" from="Grid" to="TileMapLayer" method="_on_grid_updated"]
