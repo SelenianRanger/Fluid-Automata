@@ -4,5 +4,5 @@
 
 [node name="Globals" type="Node" unique_id=86316622]
 script = ExtResource("1_e82qx")
-grid_size = Vector2i(300, 300)
+grid_size = Vector2i(100, 100)
 section_size = Vector2i(10, 10)
