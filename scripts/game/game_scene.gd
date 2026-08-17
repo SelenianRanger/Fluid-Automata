@@ -18,7 +18,7 @@ func apply_cursor(pos, color):
 				var y = pos.y + j
 				if(y < 1 || y > Globals.grid_size.y - 2):
 					continue
-				if(cursor[Globals.get_packed_index(Vector2i(5, 5), i + 2, j + 2)] == 0):
+				if(cursor[Helpers.get_packed_index(Vector2i(5, 5), i + 2, j + 2)] == 0):
 					continue
 				$Grid.set_tile(x, y, color)
 				$TileMapLayer.set_cell(Vector2i(x, y) - Vector2i.ONE, 0, Vector2i(color, 0))

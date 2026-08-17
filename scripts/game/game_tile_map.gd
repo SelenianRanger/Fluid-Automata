@@ -6,7 +6,7 @@ func _on_grid_updated() -> void:
 	var section_grid_size = Globals.grid_size / Globals.section_size
 	for sub_i in range(section_grid_size.x):
 		for sub_j in range(section_grid_size.y):
-			var index = Globals.get_packed_index(section_grid_size, sub_i, sub_j)
+			var index = Helpers.get_packed_index(section_grid_size, sub_i, sub_j)
 			if(section_grid[index] == 0):
 				continue
 			if(section_grid[index] > 1):
@@ -18,5 +18,5 @@ func _on_grid_updated() -> void:
 			var j2 = min(Globals.grid_size[1] - 1, j1 + Globals.section_size[1])
 			for i in range(i1, i2):
 				for j in range(j1, j2):
-					index = Globals.get_packed_index(Globals.grid_size, i, j)
+					index = Helpers.get_packed_index(Globals.grid_size, i, j)
 					set_cell(Vector2i(i-1, j-1), 0, Vector2i(grid[index], 0))

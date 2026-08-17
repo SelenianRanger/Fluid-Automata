@@ -7,7 +7,7 @@ var paint_mode = -1
 
 func reset_cursor() -> void:
 	for i in range(cursor.size()):
-		var coords = Globals.get_packed_coords(Vector2i(5, 5), i)
+		var coords = Helpers.get_packed_coords(Vector2i(5, 5), i)
 		cursor[i] = cursor_default[i]
 		set_cell(coords, 0, Vector2i(cursor[i], 0))
 
@@ -15,7 +15,7 @@ func _ready() -> void:
 	cursor.resize(25)
 	for i in range(5):
 		for j in range(5):
-			var index = Globals.get_packed_index(Vector2i(5, 5), i, j)
+			var index = Helpers.get_packed_index(Vector2i(5, 5), i, j)
 			cursor[index] = get_cell_atlas_coords(Vector2i(i, j)).x
 	cursor_default = cursor.duplicate()
 
@@ -26,7 +26,7 @@ func _input(event: InputEvent) -> void:
 		mouse_coords[1] < 0 || \
 		mouse_coords[1] >= 5):
 			return
-	var index = Globals.get_packed_index(Vector2i(5, 5), mouse_coords.x, mouse_coords.y)
+	var index = Helpers.get_packed_index(Vector2i(5, 5), mouse_coords.x, mouse_coords.y)
 	if(Input.is_action_just_released("cell_paint")):
 		paint_mode = -1	
 	if(Input.is_action_just_pressed("cell_paint")):
@@ -49,7 +49,7 @@ func _on_load_cursor_from_file(path: String) -> void:
 	if(data.size() != 25):
 		return
 	for i in range(cursor.size()):
-		var coords = Globals.get_packed_coords(Vector2i(5, 5), i)
+		var coords = Helpers.get_packed_coords(Vector2i(5, 5), i)
 		cursor[i] = data[i]
 		set_cell(coords, 0, Vector2i(cursor[i], 0))
 
