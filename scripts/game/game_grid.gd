@@ -2,14 +2,12 @@ extends Node
 
 signal grid_updated()
 
-var grid := Globals.grid
-var neighbors := Globals.neighbors
-var section_grid := Globals.section_grid
-var section_grid_neighbors := Globals.section_grid_neighbors
+var grid := GameState.grid
+var neighbors := GameState.neighbors
+var section_grid := GameState.section_grid
+var section_grid_neighbors := GameState.section_grid_neighbors
 
 var rules := Rules.new()
-
-var is_paused = false
 
 func update_tile(x, y) -> int:
 	for rule in rules.rules:
@@ -19,16 +17,16 @@ func update_tile(x, y) -> int:
 	return 0
 
 func set_tile(x, y, type):
-	var index = Helpers.get_packed_index(Globals.grid_size, x, y)
+	var index = Helpers.get_packed_index(Settings.game.grid_size, x, y)
 	if(grid[index] == type):
 		return
 	grid[index] = type
 	mark_subsection(x, y)
 
 func mark_subsection(x, y):
-	var section_grid_size = Globals.grid_size / Globals.section_size
-	var sub_i = x / Globals.section_size[0]
-	var sub_j = y / Globals.section_size[1]
+	var section_grid_size = Settings.game.grid_size / Settings.game.section_size
+	var sub_i = x / Settings.game.section_size[0]
+	var sub_j = y / Settings.game.section_size[1]
 	section_grid[Helpers.get_packed_index(section_grid_size, sub_i, sub_j)] = 1
 	
 	for index in section_grid_neighbors[x][y]:
@@ -45,77 +43,77 @@ func reset_grid(fill : PackedByteArray = []) -> void:
 	emit_signal("grid_updated")
 
 func _init() -> void:
-	var section_grid_size = Globals.grid_size / Globals.section_size
-	grid.resize(Globals.grid_size.x * Globals.grid_size.y)
+	var section_grid_size = Settings.game.grid_size / Settings.game.section_size
+	grid.resize(Settings.game.grid_size.x * Settings.game.grid_size.y)
 	neighbors.resize(grid.size())
 	section_grid.resize(section_grid_size.x * section_grid_size.y)
 	grid.fill(0)
 	neighbors.fill(0)
 	section_grid.fill(1)
 	
-	section_grid_neighbors.resize(Globals.grid_size.x)
+	section_grid_neighbors.resize(Settings.game.grid_size.x)
 	for i in section_grid_neighbors.size():
-		section_grid_neighbors[i].resize(Globals.grid_size.y)
-		var sub_i = i / Globals.section_size.x
+		section_grid_neighbors[i].resize(Settings.game.grid_size.y)
+		var sub_i = i / Settings.game.section_size.x
 		for j in section_grid_neighbors[i].size():
-			var sub_j = j / Globals.section_size.y
+			var sub_j = j / Settings.game.section_size.y
 			section_grid_neighbors[i][j] = []
-			if( sub_i > 0 && i == sub_i * Globals.section_size.x ):
+			if( sub_i > 0 && i == sub_i * Settings.game.section_size.x ):
 				section_grid_neighbors[i][j].append(Vector2i(sub_i - 1, sub_j))
-				if( sub_j > 0 && j == sub_j * Globals.section_size.y ) :
+				if( sub_j > 0 && j == sub_j * Settings.game.section_size.y ) :
 					section_grid_neighbors[i][j].append(Vector2i(sub_i - 1, sub_j - 1))
-				elif( sub_j < section_grid_size.y - 1 && j == (sub_j + 1) * Globals.section_size.y - 1 ):
+				elif( sub_j < section_grid_size.y - 1 && j == (sub_j + 1) * Settings.game.section_size.y - 1 ):
 					section_grid_neighbors[i][j].append(Vector2i(sub_i - 1, sub_j + 1))
-			elif( sub_i < section_grid_size.x - 1 && i == (sub_i + 1) * Globals.section_size.x - 1 ):
+			elif( sub_i < section_grid_size.x - 1 && i == (sub_i + 1) * Settings.game.section_size.x - 1 ):
 				section_grid_neighbors[i][j].append(Vector2i(sub_i + 1, sub_j))
-				if( sub_j > 0 && j == sub_j * Globals.section_size.y ) :
+				if( sub_j > 0 && j == sub_j * Settings.game.section_size.y ) :
 					section_grid_neighbors[i][j].append(Vector2i(sub_i + 1, sub_j - 1))
-				elif( sub_j < section_grid_size.y - 1 && j == (sub_j + 1) * Globals.section_size.y - 1 ):
+				elif( sub_j < section_grid_size.y - 1 && j == (sub_j + 1) * Settings.game.section_size.y - 1 ):
 					section_grid_neighbors[i][j].append(Vector2i(sub_i + 1, sub_j + 1))
-			if( sub_j > 0 && j == sub_j * Globals.section_size.y ) :
+			if( sub_j > 0 && j == sub_j * Settings.game.section_size.y ) :
 				section_grid_neighbors[i][j].append(Vector2i(sub_i, sub_j - 1))
-			elif( sub_j < section_grid_size.y - 1 && j == (sub_j + 1) * Globals.section_size.y - 1 ):
+			elif( sub_j < section_grid_size.y - 1 && j == (sub_j + 1) * Settings.game.section_size.y - 1 ):
 				section_grid_neighbors[i][j].append(Vector2i(sub_i, sub_j + 1))
 
 func _ready() -> void:
-	$Timer.wait_time = 1.0 / Globals.update_speed
+	$Timer.wait_time = 1.0 / GameState.update_speed
 	emit_signal("grid_updated")
 	$Timer.start()
 
 func update_section_neighbors(section_id) -> void:
-	var section_grid_size = Globals.grid_size / Globals.section_size
+	var section_grid_size = Settings.game.grid_size / Settings.game.section_size
 	var sub_i = section_id / section_grid_size.y
 	var sub_j = section_id % section_grid_size.y
 	var index = Helpers.get_packed_index(section_grid_size, sub_i, sub_j)
 	if(section_grid[index] != 1):
 		return
-	var i1 = max(1, sub_i * Globals.section_size[0])
-	var i2 = min(Globals.grid_size[0] - 1, i1 + Globals.section_size[0])
-	var j1 = max(1, sub_j * Globals.section_size[1])
-	var j2 = min(Globals.grid_size[1] - 1, j1 + Globals.section_size[1])
+	var i1 = max(1, sub_i * Settings.game.section_size[0])
+	var i2 = min(Settings.game.grid_size[0] - 1, i1 + Settings.game.section_size[0])
+	var j1 = max(1, sub_j * Settings.game.section_size[1])
+	var j2 = min(Settings.game.grid_size[1] - 1, j1 + Settings.game.section_size[1])
 	for x in range(i1, i2):
 		for y in range(j1, j2):
-			index = Helpers.get_packed_index(Globals.grid_size, x, y)
+			index = Helpers.get_packed_index(Settings.game.grid_size, x, y)
 			neighbors[index] = 0
 			for i in range(-1, 2):
 				for j in range(-1, 2):
 					if( i == 0 and j == 0 ):
 						continue
-					var index2 = Helpers.get_packed_index(Globals.grid_size, x + i, y + j)
+					var index2 = Helpers.get_packed_index(Settings.game.grid_size, x + i, y + j)
 					neighbors[index] += grid[index2]
 
 func update_section(section_id) -> void:
-	var section_grid_size = Globals.grid_size / Globals.section_size
+	var section_grid_size = Settings.game.grid_size / Settings.game.section_size
 	var sub_i = section_id / section_grid_size.y
 	var sub_j = section_id % section_grid_size.y
 	var index = Helpers.get_packed_index(section_grid_size, sub_i, sub_j)
 	if(section_grid[index] != 1):
 		return
 	var tiles_changed = 0
-	var i1 = max(1, sub_i * Globals.section_size[0])
-	var i2 = min(Globals.grid_size[0] - 1, i1 + Globals.section_size[0])
-	var j1 = max(1, sub_j * Globals.section_size[1])
-	var j2 = min(Globals.grid_size[1] - 1, j1 + Globals.section_size[1])
+	var i1 = max(1, sub_i * Settings.game.section_size[0])
+	var i2 = min(Settings.game.grid_size[0] - 1, i1 + Settings.game.section_size[0])
+	var j1 = max(1, sub_j * Settings.game.section_size[1])
+	var j2 = min(Settings.game.grid_size[1] - 1, j1 + Settings.game.section_size[1])
 	for i in range(i1, i2):
 		for j in range(j1, j2):
 			tiles_changed += update_tile(i, j)
@@ -123,17 +121,17 @@ func update_section(section_id) -> void:
 		section_grid[index] = 0
 
 func update_neighbors() -> void:
-	var section_grid_size = Globals.grid_size / Globals.section_size
+	var section_grid_size = Settings.game.grid_size / Settings.game.section_size
 	var task_id = WorkerThreadPool.add_group_task(update_section_neighbors, section_grid_size.x * section_grid_size.y)
 	WorkerThreadPool.wait_for_group_task_completion(task_id)
 	
 func update_grid():
-	var section_grid_size = Globals.grid_size / Globals.section_size
+	var section_grid_size = Settings.game.grid_size / Settings.game.section_size
 	var task_id = WorkerThreadPool.add_group_task(update_section, section_grid_size.x * section_grid_size.y)
 	WorkerThreadPool.wait_for_group_task_completion(task_id)
 
 func _on_timer_timeout() -> void:
-	if(Globals.is_paused):
+	if(GameState.is_paused):
 		return
 	update_neighbors()
 	update_grid()

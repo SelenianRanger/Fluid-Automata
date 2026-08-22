@@ -17,8 +17,8 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-Globals="*uid://bgeujobtagvdc"
-Helpers="*uid://dae2ecx50xwc6"
+GameState="*uid://dqttqfmiyfc6"
+Settings="*uid://b16pbkfcja84a"
 
 [debug]
 
@@ -29,8 +29,8 @@ gdscript/warnings/integer_division=0
 
 window/size/viewport_width=800
 window/size/viewport_height=845
-window/stretch/mode="canvas_items"
-window/stretch/aspect="keep_height"
+window/stretch/aspect="expand"
+window/handheld/orientation=1
 window/vsync/vsync_mode=0
 
 [input]

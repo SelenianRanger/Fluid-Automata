@@ -1,10 +1,10 @@
 [gd_scene format=4 uid="uid://b4c473fbm1365"]
 
-[ext_resource type="Script" uid="uid://dfoiojahva4mw" path="res://scripts/game/game_viewport_container.gd" id="1_85g3d"]
 [ext_resource type="PackedScene" uid="uid://cpdoxjk3cd4fk" path="res://scenes/game.tscn" id="1_o5qli"]
+[ext_resource type="Script" uid="uid://bc4nocmf6q063" path="res://scripts/main.gd" id="1_ya4ey"]
 [ext_resource type="Script" uid="uid://mqh63gn3okrv" path="res://scripts/ui/label_spd.gd" id="2_jyhfs"]
 [ext_resource type="Texture2D" uid="uid://cajac07k1oj7b" path="res://assets/tiles.png" id="3_4vge2"]
-[ext_resource type="Script" uid="uid://bewrh3atgl1qc" path="res://scripts/ui/cursor_tile_map.gd" id="3_sugp2"]
+[ext_resource type="Script" uid="uid://bewrh3atgl1qc" path="res://scripts/ui/brush_tile_map.gd" id="3_sugp2"]
 [ext_resource type="Texture2D" uid="uid://4ojxcn8f6iqh" path="res://assets/icons/pause.png" id="4_choun"]
 [ext_resource type="Texture2D" uid="uid://bo0rg8nf2fipq" path="res://assets/icons/reset.png" id="4_tefeu"]
 [ext_resource type="Script" uid="uid://2m0vsktxjfbp" path="res://scripts/ui/pause_button.gd" id="5_choun"]
@@ -26,6 +26,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_ya4ey")
 
 [node name="game" type="Control" parent="." unique_id=1042753492]
 layout_mode = 1
@@ -38,22 +39,21 @@ grow_vertical = 2
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="game" unique_id=139949439]
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = -1
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("1_85g3d")
+stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="game/SubViewportContainer" unique_id=1874034681]
 handle_input_locally = false
+size = Vector2i(800, 800)
 render_target_update_mode = 4
 
 [node name="GameScn" parent="game/SubViewportContainer/SubViewport" unique_id=1808051195 instance=ExtResource("1_o5qli")]
-position = Vector2(0, 76)
 
 [node name="LoadMapDialog" type="FileDialog" parent="game/SubViewportContainer/SubViewport/GameScn" unique_id=914199118]
-title = "Load Map"
+title = "Open a File"
 file_mode = 0
 display_mode = 1
 access = 2
@@ -73,11 +73,10 @@ use_native_dialog = true
 custom_minimum_size = Vector2(800, 0)
 custom_maximum_size = Vector2(1000, -1)
 layout_mode = 3
-anchors_preset = 15
+anchors_preset = 10
 anchor_right = 1.0
-anchor_bottom = 1.0
+offset_bottom = 45.0
 grow_horizontal = 2
-grow_vertical = 2
 mouse_filter = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="CanvasLayer/ui" unique_id=1029504402]
@@ -101,23 +100,27 @@ layout_mode = 2
 [node name="Label2" type="Label" parent="CanvasLayer/ui/PanelContainer/HBoxContainer/CenterContainer/HBoxContainer" unique_id=242178581]
 layout_mode = 2
 text = "Speed:"
+horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="HSlider" type="HSlider" parent="CanvasLayer/ui/PanelContainer/HBoxContainer/CenterContainer/HBoxContainer" unique_id=1645180950]
 custom_minimum_size = Vector2(80, 25)
 layout_mode = 2
+size_flags_vertical = 4
 focus_mode = 0
-min_value = 0.5
+min_value = 1.0
 max_value = 20.0
-step = 0.5
 value = 10.0
-tick_count = 7
+tick_count = 5
 ticks_on_borders = true
 ticks_position = 3
 
 [node name="Label" type="Label" parent="CanvasLayer/ui/PanelContainer/HBoxContainer/CenterContainer/HBoxContainer" unique_id=907286264]
+custom_minimum_size = Vector2(40, 0)
+custom_maximum_size = Vector2(40, -1)
 layout_mode = 2
 text = "10/s"
+horizontal_alignment = 1
 vertical_alignment = 1
 script = ExtResource("2_jyhfs")
 
@@ -135,6 +138,7 @@ layout_mode = 2
 custom_minimum_size = Vector2(35, 35)
 custom_maximum_size = Vector2(35, 35)
 layout_mode = 2
+tooltip_text = "Pause"
 focus_mode = 0
 theme_override_font_sizes/font_size = 20
 toggle_mode = true
@@ -147,6 +151,7 @@ script = ExtResource("5_choun")
 custom_minimum_size = Vector2(35, 35)
 custom_maximum_size = Vector2(35, 35)
 layout_mode = 2
+tooltip_text = "Reset"
 focus_mode = 0
 icon = ExtResource("4_tefeu")
 icon_alignment = 1
@@ -175,6 +180,7 @@ alignment = 1
 custom_minimum_size = Vector2(35, 35)
 custom_maximum_size = Vector2(35, 35)
 layout_mode = 2
+tooltip_text = "Load Map"
 focus_mode = 0
 icon = ExtResource("5_tipki")
 icon_alignment = 1
@@ -184,6 +190,7 @@ expand_icon = true
 custom_minimum_size = Vector2(35, 35)
 custom_maximum_size = Vector2(35, 35)
 layout_mode = 2
+tooltip_text = "Save Map"
 focus_mode = 0
 icon = ExtResource("6_85g3d")
 icon_alignment = 1
@@ -225,21 +232,21 @@ handle_input_locally = false
 size = Vector2i(160, 160)
 render_target_update_mode = 0
 
-[node name="CursorTileMapLayer" type="TileMapLayer" parent="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport" unique_id=1489927147]
+[node name="BrushTileMapLayer" type="TileMapLayer" parent="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport" unique_id=1489927147]
 scale = Vector2(2, 2)
 tile_map_data = PackedByteArray("AAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAABAAEAAAABAAAAAAACAAEAAAABAAAAAAACAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAIAAAAAAAAAAAABAAIAAAABAAAAAAADAAEAAAAAAAAAAAADAAAAAAAAAAAAAAADAAIAAAABAAAAAAADAAMAAAAAAAAAAAACAAMAAAABAAAAAAABAAMAAAAAAAAAAAAAAAMAAAAAAAAAAAAEAAAAAAAAAAAAAAAEAAEAAAAAAAAAAAAEAAIAAAAAAAAAAAAEAAMAAAAAAAAAAAAEAAQAAAAAAAAAAAADAAQAAAAAAAAAAAACAAQAAAAAAAAAAAABAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAACAAIAAAAAAAAAAAA=")
 tile_set = SubResource("TileSet_keve6")
 script = ExtResource("3_sugp2")
 
-[node name="LoadCursorDialog" type="FileDialog" parent="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/CursorTileMapLayer" unique_id=595352107]
-title = "Load Cursor"
+[node name="LoadBrushDialog" type="FileDialog" parent="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" unique_id=595352107]
+title = "Open a File"
 file_mode = 0
 display_mode = 1
 access = 2
 filters = PackedStringArray("*.brush")
 use_native_dialog = true
 
-[node name="SaveCursorDialog" type="FileDialog" parent="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/CursorTileMapLayer" unique_id=1384218773]
+[node name="SaveBrushDialog" type="FileDialog" parent="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" unique_id=1384218773]
 title = "Save Cursor"
 display_mode = 1
 access = 2
@@ -250,19 +257,21 @@ use_native_dialog = true
 layout_mode = 2
 alignment = 1
 
-[node name="LoadCursorButton" type="Button" parent="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer" unique_id=255453109]
+[node name="LoadBrushButton" type="Button" parent="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer" unique_id=255453109]
 custom_minimum_size = Vector2(35, 35)
 custom_maximum_size = Vector2(35, 35)
 layout_mode = 2
+tooltip_text = "Load Brush"
 focus_mode = 0
 icon = ExtResource("5_tipki")
 icon_alignment = 1
 expand_icon = true
 
-[node name="SaveCursorButton" type="Button" parent="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer" unique_id=737644124]
+[node name="SaveBrushButton" type="Button" parent="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer" unique_id=737644124]
 custom_minimum_size = Vector2(35, 35)
 custom_maximum_size = Vector2(35, 35)
 layout_mode = 2
+tooltip_text = "Save Brush"
 focus_mode = 0
 icon = ExtResource("6_85g3d")
 icon_alignment = 1
@@ -272,16 +281,17 @@ expand_icon = true
 layout_mode = 2
 theme_override_constants/margin_left = 45
 
-[node name="ResetCursorButton" type="Button" parent="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/MarginContainer" unique_id=1609683271]
+[node name="ResetBrushButton" type="Button" parent="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/MarginContainer" unique_id=1609683271]
 custom_minimum_size = Vector2(35, 35)
 custom_maximum_size = Vector2(35, 35)
 layout_mode = 2
+tooltip_text = "Reset Brush"
 focus_mode = 0
 icon = ExtResource("4_tefeu")
 icon_alignment = 1
 expand_icon = true
 
-[connection signal="resized" from="game/SubViewportContainer" to="game/SubViewportContainer" method="_on_resized"]
+[connection signal="resized" from="game/SubViewportContainer" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_viewport_resized"]
 [connection signal="pause_changed" from="game/SubViewportContainer/SubViewport/GameScn" to="CanvasLayer/ui/PanelContainer/HBoxContainer/MarginContainer2/CenterContainer/HBoxContainer/PauseButton" method="_on_pause_changed"]
 [connection signal="file_selected" from="game/SubViewportContainer/SubViewport/GameScn/LoadMapDialog" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_load_map_from_file"]
 [connection signal="file_selected" from="game/SubViewportContainer/SubViewport/GameScn/SaveMapDialog" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_save_map_to_file"]
@@ -291,8 +301,8 @@ expand_icon = true
 [connection signal="pressed" from="CanvasLayer/ui/PanelContainer/HBoxContainer/MarginContainer2/CenterContainer/HBoxContainer/ResetMapButton" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_reset_pressed"]
 [connection signal="pressed" from="CanvasLayer/ui/MarginContainer3/CenterContainer/HBoxContainer/LoadMapButton" to="game/SubViewportContainer/SubViewport/GameScn" method="load_map"]
 [connection signal="pressed" from="CanvasLayer/ui/MarginContainer3/CenterContainer/HBoxContainer/SaveMapButton" to="game/SubViewportContainer/SubViewport/GameScn" method="save_map"]
-[connection signal="file_selected" from="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/CursorTileMapLayer/LoadCursorDialog" to="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/CursorTileMapLayer" method="_on_load_cursor_from_file"]
-[connection signal="file_selected" from="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/CursorTileMapLayer/SaveCursorDialog" to="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/CursorTileMapLayer" method="_on_save_cursor_to_file"]
-[connection signal="pressed" from="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/LoadCursorButton" to="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/CursorTileMapLayer" method="load_cursor"]
-[connection signal="pressed" from="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/SaveCursorButton" to="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/CursorTileMapLayer" method="save_cursor"]
-[connection signal="pressed" from="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/MarginContainer/ResetCursorButton" to="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/CursorTileMapLayer" method="reset_cursor"]
+[connection signal="file_selected" from="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer/LoadBrushDialog" to="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" method="_on_load_cursor_from_file"]
+[connection signal="file_selected" from="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer/SaveBrushDialog" to="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" method="_on_save_cursor_to_file"]
+[connection signal="pressed" from="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/LoadBrushButton" to="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" method="load_cursor"]
+[connection signal="pressed" from="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/SaveBrushButton" to="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" method="save_cursor"]
+[connection signal="pressed" from="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/MarginContainer/ResetBrushButton" to="CanvasLayer/ui/MarginContainer2/FoldableContainer/MarginContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" method="reset_cursor"]

@@ -1,11 +1,11 @@
 class_name Rules
 extends RefCounted
 
-var grid := Globals.grid
-var neighbors := Globals.neighbors
-
+var grid := GameState.grid
+var neighbors := GameState.neighbors
+	
 func underpopulation(x, y) -> bool:
-	var index = Helpers.get_packed_index(Globals.grid_size, x, y)
+	var index = Helpers.get_packed_index(Settings.game.grid_size, x, y)
 	if( grid[index] == 0 ):
 		return false
 	if( neighbors[index] < 2 ):
@@ -14,7 +14,7 @@ func underpopulation(x, y) -> bool:
 	return false
 	
 func overpopulation(x, y) -> bool:
-	var index = Helpers.get_packed_index(Globals.grid_size, x, y)
+	var index = Helpers.get_packed_index(Settings.game.grid_size, x, y)
 	if( grid[index] == 0 ):
 		return false
 	if( neighbors[index] > 3 ):
@@ -23,7 +23,7 @@ func overpopulation(x, y) -> bool:
 	return false
 	
 func reproduction(x, y) -> bool:
-	var index = Helpers.get_packed_index(Globals.grid_size, x, y)
+	var index = Helpers.get_packed_index(Settings.game.grid_size, x, y)
 	if( grid[index] == 1 ):
 		return false
 	if( neighbors[index] == 3 ):
