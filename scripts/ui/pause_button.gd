@@ -11,4 +11,4 @@ func _process(delta: float) -> void:
 	pass
 
 func _on_pause_changed() -> void:
-	set_pressed_no_signal(GameState.is_paused)
+	set_pressed_no_signal(GameState.IsPaused)
