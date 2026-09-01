@@ -8,10 +8,10 @@ public partial class GameGrid : Node
 	
 	public override void _Ready()
 	{
-		Init();
 		var timer = GetNode<Timer>("Timer");
-		EmitSignal(SignalName.GridUpdated);
-		timer.Timeout += OnTimerTimeout;
+		Init();
+		UpdateTick();
+		timer.Timeout += UpdateTick;
 		timer.WaitTime = 1f / Settings.Instance.Game.UpdateSpeed;
 		timer.Start();
 	}
@@ -71,14 +71,18 @@ public partial class GameGrid : Node
 	{
 		Array.Fill(GameState.Instance.Grid, (byte)0);
 		Array.Fill(GameState.Instance.SectionGrid, (byte)1);
-		EmitSignal(SignalName.GridUpdated);
+		GameState.Instance.ResetUndo();
+		GameState.Instance.TickState = GameState.TickStatus.DrawOnly;
+		UpdateTick();
 	}
 	
 	public void ResetGrid(byte[] fill)
 	{
 		fill.AsSpan().CopyTo(GameState.Instance.Grid);
 		Array.Fill(GameState.Instance.SectionGrid, (byte)1);
-		EmitSignal(SignalName.GridUpdated);
+		GameState.Instance.ResetUndo();
+		GameState.Instance.TickState = GameState.TickStatus.FullTick;
+		UpdateTick();
 	}
 
 	private int UpdateTile(Vector2I pos)
@@ -98,18 +102,21 @@ public partial class GameGrid : Node
 		if (GameState.Instance.Grid[index] == value) return;
 		GameState.Instance.Grid[index] = value;
 		MarkSection(pos);
+		GameState.Instance.TickState = GameState.TickStatus.FullTick;
 	}
 	
 	public void MarkSection(Vector2I pos)
 	{
 		var subI = pos.X /  Settings.Instance.Game.SectionSize.Y;
 		var subJ = pos.Y /  Settings.Instance.Game.SectionSize.Y;
-		GameState.Instance.SectionGrid[GridUtils.GetPackedIndex(Settings.Instance.Game.SectionGridSize, 
+		GameState.Instance.SectionGrid[GridUtils.GetPackedIndex(
+			Settings.Instance.Game.SectionGridSize, 
 			new Vector2I(subI, subJ))] = 1;
-
+		
 		foreach (var neighbor in GameState.Instance.SectionNeighbors[pos.X][pos.Y])
 		{
-			var index = GridUtils.GetPackedIndex(Settings.Instance.Game.SectionGridSize, 
+			var index = GridUtils.GetPackedIndex(
+				Settings.Instance.Game.SectionGridSize, 
 				new Vector2I(neighbor.X, neighbor.Y));
 			if (GameState.Instance.SectionGrid[index] != 1)
 				GameState.Instance.SectionGrid[index] = 2;
@@ -120,9 +127,10 @@ public partial class GameGrid : Node
 	{
 		var subI = id /  Settings.Instance.Game.SectionGridSize.Y;
 		var subJ = id %  Settings.Instance.Game.SectionGridSize.Y;
-		var index = GridUtils.GetPackedIndex(Settings.Instance.Game.SectionGridSize, 
+		var index = GridUtils.GetPackedIndex(
+			Settings.Instance.Game.SectionGridSize, 
 			new Vector2I(subI, subJ));
-		if (GameState.Instance.SectionGrid[index] != 1 && false) return;
+		if (GameState.Instance.SectionGrid[index] != 1) return;
 		var i1 = Math.Max(1, subI * Settings.Instance.Game.SectionSize.X);
 		var i2 = Math.Min(Settings.Instance.Game.GridSize.X - 1, i1 + Settings.Instance.Game.SectionSize.X);
 		var j1 = Math.Max(1, subJ * Settings.Instance.Game.SectionSize.Y);
@@ -151,7 +159,7 @@ public partial class GameGrid : Node
 		var subJ = id %  Settings.Instance.Game.SectionGridSize.Y;
 		var index = GridUtils.GetPackedIndex(Settings.Instance.Game.SectionGridSize, 
 			new Vector2I(subI, subJ));
-		if (GameState.Instance.SectionGrid[index] != 1 && false) return;
+		if (GameState.Instance.SectionGrid[index] != 1) return;
 		var tilesChanged = 0;
 		var i1 = Math.Max(1, subI * Settings.Instance.Game.SectionSize.X);
 		var i2 = Math.Min(Settings.Instance.Game.GridSize.X - 1, i1 + Settings.Instance.Game.SectionSize.X);
@@ -161,8 +169,10 @@ public partial class GameGrid : Node
 		for (var i = i1; i < i2; i++)
 		for (var j = j1; j < j2; j++)
 			tilesChanged += UpdateTile(new Vector2I(i, j));
-		if(tilesChanged == 0)
+		if (tilesChanged == 0)
 			GameState.Instance.SectionGrid[index] = 0;
+		else
+			GameState.Instance.TickState = GameState.TickStatus.FullTick;
 	}
 
 	public void UpdateNeighbors()
@@ -179,17 +189,36 @@ public partial class GameGrid : Node
 		WorkerThreadPool.WaitForGroupTaskCompletion(taskId);
 	}
 
-	public void UpdateTick()
+	public void Undo()
 	{
-		UpdateNeighbors();
-		UpdateGrid();
-		EmitSignal(SignalName.GridUpdated);
+		GameState.Instance.Undo();
+		UpdateTick();
 	}
 	
-	private void OnTimerTimeout()
+	public void RevertBuffer()
 	{
-		if (GameState.Instance.IsPaused) return;
-		UpdateTick();
+		GameState.Instance.RevertToSnapshot();
+	}
+	
+	public void BufferNextFrame()
+	{
+		GameState.Instance.TickState = GameState.TickStatus.DrawOnly;
+		UpdateNeighbors();
+		UpdateGrid();
+	}
+	
+	public void UpdateTick()
+	{
+		if (GameState.Instance.TickState == GameState.TickStatus.Idle) return;
+		GameState.Instance.PushUndo();
+		EmitSignal(SignalName.GridUpdated);
+		if(GameState.Instance.TickState == GameState.TickStatus.DrawOnly)
+		{
+			GameState.Instance.TickState = GameState.TickStatus.Idle;
+			return;
+		}
+		
+		BufferNextFrame();
 	}
 	
 }

@@ -4,13 +4,16 @@ using Godot;
 public partial class SettingsGame : Resource
 {
     [Export] 
-    public Vector2I GridSize = new(100, 100);
+    public Vector2I GridSize = new(200, 200);
     
     [Export] 
-    public Vector2I SectionSize = new(10, 10);
+    public Vector2I SectionSize = new(20, 20);
     
     [Export] 
     public float UpdateSpeed = 10.0f;
+
+    [Export] 
+    public int UndoCount = 50;
 
     public Vector2I SectionGridSize => GridSize / SectionSize;
 }

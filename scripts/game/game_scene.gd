@@ -1,6 +1,15 @@
 extends Node2D
 
 signal pause_changed()
+signal undo_changed()
+
+enum DrawingStatus {
+	IDLE,
+	DRAWING,
+	ERASING
+}
+
+var _draw_state = DrawingStatus.IDLE
 
 func set_paused(state : bool):
 	if(GameState.IsPaused == state):
@@ -47,13 +56,31 @@ func _input(event: InputEvent) -> void:
 		mouse_coords[1] >= Settings.Game.GridSize.y - 2):
 			return
 	mouse_coords += Vector2i.ONE
-	if(Input.is_action_just_released("cell_paint") || \
-	Input.is_action_just_released("cell_erase")):
-		$Grid.UpdateNeighbors()
-	if(Input.is_action_pressed("cell_paint")):
-		paint_grid(mouse_coords, 1, Input.is_action_pressed("shift_modifier"))
-	elif(Input.is_action_pressed("cell_erase")):
-		paint_grid(mouse_coords, 0, Input.is_action_pressed("shift_modifier"))
+	
+	if(_draw_state == DrawingStatus.IDLE):
+		if (Input.is_action_just_pressed("cell_paint")):
+				_draw_state = DrawingStatus.DRAWING
+				$Grid.RevertBuffer()
+		elif (Input.is_action_just_pressed("cell_erase")):
+			_draw_state = DrawingStatus.ERASING
+			$Grid.RevertBuffer()
+	match _draw_state:
+		DrawingStatus.DRAWING:
+			if (Input.is_action_just_released("cell_paint")):
+				_draw_state = DrawingStatus.IDLE
+				GameState.PushUndo()
+				emit_signal("undo_changed")
+				$Grid.BufferNextFrame()
+			elif(Input.is_action_pressed("cell_paint")):
+				paint_grid(mouse_coords, 1, Input.is_action_pressed("shift_modifier"))
+		DrawingStatus.ERASING:
+			if (Input.is_action_just_released("cell_erase")):
+				_draw_state = DrawingStatus.IDLE
+				GameState.PushUndo()
+				emit_signal("undo_changed")
+				$Grid.BufferNextFrame()
+			elif(Input.is_action_pressed("cell_erase")):
+				paint_grid(mouse_coords, 0, Input.is_action_pressed("shift_modifier"))
 
 func update_camera() -> void:
 	$Camera2D.update_camera()
@@ -66,6 +93,11 @@ func _on_pause_toggled(toggled_on: bool) -> void:
 
 func _on_next_frame_pressed() -> void:
 	$Grid.UpdateTick()
+	emit_signal("undo_changed")
+
+func _on_undo_pressed() -> void:
+	$Grid.Undo()
+	emit_signal("undo_changed")
 
 func _on_speed_changed(value: float) -> void:
 	GameState.UpdateSpeed = value
@@ -73,6 +105,7 @@ func _on_speed_changed(value: float) -> void:
 
 func _on_reset_pressed() -> void:
 	$Grid.ResetGrid()
+	emit_signal("undo_changed")
 
 func load_map() -> void:
 	set_paused(true)
@@ -87,8 +120,9 @@ func _on_load_map_from_file(path: String) -> void:
 	if(data.size() != GameState.Grid.size()):
 		return
 	$Grid.ResetGrid(data)
+	emit_signal("undo_changed")
 
 func _on_save_map_to_file(path: String) -> void:
 	var file = FileAccess.open(path, FileAccess.WRITE)
-	file.store_buffer(GameState.Grid)
+	file.store_buffer(GameState.Snapshot.Grid)
 	file.close()
