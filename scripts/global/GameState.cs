@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Godot;
 using Godot.Collections;
@@ -15,6 +16,18 @@ public partial class GameState : Node
 	public readonly int GRID = (int)DataType.Grid;
 	public readonly int NEIGHBORS = (int)DataType.Neighbors;
 	public readonly int SECTIONGRID = (int)DataType.SectionGrid;
+
+	[Flags]
+	public enum SectionFlag : byte
+	{
+		Pass = 0,
+		Draw = 1 << 0,
+		Process = 1 << 1
+	}
+
+	public readonly int PASS = (int)SectionFlag.Pass;
+	public readonly int DRAW = (int)SectionFlag.Draw;
+	public readonly int PROCESS = (int)SectionFlag.Process;
 	
 	public enum TickStatus
 	{
@@ -102,8 +115,7 @@ public partial class GameState : Node
 	    var oldSectionGrid = (byte[])SectionGrid.Clone();
 	    SectionGrid = (byte[])snapshot.SectionGrid.Clone();
 	    for (var i = 0; i < SectionGrid.Length; i++)
-		    if((oldSectionGrid[i] & 1) == 1 && SectionGrid[i] != oldSectionGrid[i])
-				SectionGrid[i] += 1;
+		    SectionGrid[i] |= (byte)(oldSectionGrid[i] & (byte)SectionFlag.Draw);
 	    UndoStack.RemoveFirst();
     }
 

@@ -2,10 +2,12 @@
 
 [ext_resource type="Script" uid="uid://dt2jld17dltf8" path="res://scripts/game/game_scene.gd" id="1_j7wrs"]
 [ext_resource type="Script" uid="uid://bwg7hn0x6p7cj" path="res://scripts/game/GameGrid.cs" id="2_iywne"]
-[ext_resource type="Texture2D" uid="uid://cajac07k1oj7b" path="res://assets/tiles.png" id="3_4vge2"]
+[ext_resource type="Texture2D" uid="uid://cajac07k1oj7b" path="res://assets/tilesets/cells.png" id="3_4vge2"]
 [ext_resource type="Script" uid="uid://bfig7fd24k5fk" path="res://scripts/game/game_timer.gd" id="3_p57ef"]
 [ext_resource type="Script" uid="uid://b70dvg4ur8qfd" path="res://scripts/game/game_tile_map.gd" id="4_4vge2"]
+[ext_resource type="Texture2D" uid="uid://bknvlcgo2kax" path="res://assets/tilesets/overlays.png" id="6_gee14"]
 [ext_resource type="Script" uid="uid://w0kccclfcilw" path="res://scripts/game/game_camera.gd" id="6_j7wrs"]
+[ext_resource type="Script" uid="uid://b4ynxgbcp4wf6" path="res://scripts/game/section_overlay_tile_map.gd" id="6_u5sy4"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4vge2"]
 texture = ExtResource("3_4vge2")
@@ -14,6 +16,13 @@ texture = ExtResource("3_4vge2")
 
 [sub_resource type="TileSet" id="TileSet_keve6"]
 sources/0 = SubResource("TileSetAtlasSource_4vge2")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0tnpc"]
+texture = ExtResource("6_gee14")
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_ex45t"]
+sources/0 = SubResource("TileSetAtlasSource_0tnpc")
 
 [node name="Game" type="Node2D" unique_id=1808051195]
 script = ExtResource("1_j7wrs")
@@ -24,17 +33,25 @@ script = ExtResource("2_iywne")
 [node name="Timer" type="Timer" parent="Grid" unique_id=1229513438]
 script = ExtResource("3_p57ef")
 
-[node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=126173389]
+[node name="PauseOverlay" type="CanvasModulate" parent="." unique_id=126173389]
 visible = false
 color = Color(1, 0, 0.28627452, 0.39215687)
 
-[node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=1020435799]
+[node name="GameGrid" type="TileMapLayer" parent="." unique_id=1020435799]
 tile_set = SubResource("TileSet_keve6")
 script = ExtResource("4_4vge2")
+
+[node name="SectionOverlay" type="TileMapLayer" parent="." unique_id=780431548]
+visible = false
+modulate = Color(1, 1, 1, 0.19607843)
+position = Vector2(-16, -16)
+tile_set = SubResource("TileSet_ex45t")
+script = ExtResource("6_u5sy4")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=456041188]
 editor_draw_screen = false
 script = ExtResource("6_j7wrs")
 
 [connection signal="pause_changed" from="." to="Grid/Timer" method="_on_pause_changed"]
-[connection signal="GridUpdated" from="Grid" to="TileMapLayer" method="_on_grid_updated"]
+[connection signal="GridUpdated" from="Grid" to="GameGrid" method="_on_grid_updated"]
+[connection signal="OverlaysUpdated" from="Grid" to="SectionOverlay" method="_on_overlays_updated"]

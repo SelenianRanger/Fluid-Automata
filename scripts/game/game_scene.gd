@@ -15,13 +15,13 @@ func set_paused(state : bool):
 	if(GameState.IsPaused == state):
 		return
 	GameState.IsPaused = state
-	$CanvasModulate.visible = state
+	$PauseOverlay.visible = state
 	emit_signal("pause_changed")
 	
 func paint_grid(pos, color, single_mode = false):
 	if(single_mode):
 		$Grid.SetTile(pos, color)
-		$TileMapLayer.set_cell(pos - Vector2i.ONE, 0, Vector2i(color, 0))
+		$GameGrid.set_cell(pos - Vector2i.ONE, 0, Vector2i(color, 0))
 		return;
 		
 	for i in range(-2, 3):
@@ -36,7 +36,7 @@ func paint_grid(pos, color, single_mode = false):
 				if(GameState.Brush[index] == 0):
 					continue
 				$Grid.SetTile(Vector2i(x, y), color)
-				$TileMapLayer.set_cell(Vector2i(x, y) - Vector2i.ONE, 0, Vector2i(color, 0))
+				$GameGrid.set_cell(Vector2i(x, y) - Vector2i.ONE, 0, Vector2i(color, 0))
 	
 func _input(event: InputEvent) -> void:
 	if(Input.is_action_just_pressed("restart")):
@@ -49,7 +49,7 @@ func _input(event: InputEvent) -> void:
 	if(!GameState.IsPaused):
 		return
 	
-	var mouse_coords = $TileMapLayer.local_to_map(get_local_mouse_position())
+	var mouse_coords = $GameGrid.local_to_map(get_local_mouse_position())
 	if( mouse_coords[0] < 0 || \
 		mouse_coords[0] >= Settings.Game.GridSize.x - 2 || \
 		mouse_coords[1] < 0 || \
@@ -102,6 +102,9 @@ func _on_undo_pressed() -> void:
 func _on_speed_changed(value: float) -> void:
 	GameState.UpdateSpeed = value
 	$Grid/Timer.wait_time = 1.0 / GameState.UpdateSpeed
+
+func _on_overlay_toggled(toggled_on: bool) -> void:
+	$SectionOverlay.visible = toggled_on
 
 func _on_reset_pressed() -> void:
 	$Grid.ResetGrid()

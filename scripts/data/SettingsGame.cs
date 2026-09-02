@@ -13,7 +13,7 @@ public partial class SettingsGame : Resource
     public float UpdateSpeed = 10.0f;
 
     [Export] 
-    public int UndoCount = 50;
+    public int UndoCount = 300;
 
     public Vector2I SectionGridSize => GridSize / SectionSize;
 }

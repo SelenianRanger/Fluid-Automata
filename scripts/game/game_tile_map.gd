@@ -4,14 +4,8 @@ func _on_grid_updated() -> void:
 	for sub_i in range(Settings.Game.SectionGridSize.x):
 		for sub_j in range(Settings.Game.SectionGridSize.y):
 			var index = GridUtils.GetPackedIndex(Settings.Game.SectionGridSize, Vector2i(sub_i, sub_j))
-			if(GameState.SectionGrid[index] == 0):
+			if((GameState.SectionGrid[index] & GameState.DRAW) == 0):
 				continue
-			if(GameState.SectionGrid[index] == 2):
-				GameState.SetDataCell(GameState.SECTIONGRID, Vector2i(sub_i, sub_j), 1)
-				continue
-				
-			if(GameState.SectionGrid[index] == 3):
-				GameState.SetDataCell(GameState.SECTIONGRID, Vector2i(sub_i, sub_j), 2)
 			var i1 = max(1, sub_i * Settings.Game.SectionSize.x)
 			var i2 = min(Settings.Game.GridSize.x - 1, i1 + Settings.Game.SectionSize.x)
 			var j1 = max(1, sub_j * Settings.Game.SectionSize.y)
