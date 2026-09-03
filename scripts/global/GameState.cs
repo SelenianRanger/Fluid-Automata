@@ -1,21 +1,10 @@
 using System;
-using System.Collections.Generic;
 using Godot;
 using Godot.Collections;
 
 public partial class GameState : Node
 {
 	public static GameState Instance { get; private set; }
-	
-	public enum DataType
-	{
-		Brush, Grid, Neighbors, SectionGrid
-	}
-	
-	public readonly int BRUSH = (int)DataType.Brush;
-	public readonly int GRID = (int)DataType.Grid;
-	public readonly int NEIGHBORS = (int)DataType.Neighbors;
-	public readonly int SECTIONGRID = (int)DataType.SectionGrid;
 
 	[Flags]
 	public enum SectionFlag : byte
@@ -28,31 +17,52 @@ public partial class GameState : Node
 	public readonly int PASS = (int)SectionFlag.Pass;
 	public readonly int DRAW = (int)SectionFlag.Draw;
 	public readonly int PROCESS = (int)SectionFlag.Process;
-	
-	public enum TickStatus
-	{
-		Idle, DrawOnly, FullTick
-	}
 
-	public partial class GridState(byte[] grid, byte[] neighbors, byte[] sectionGrid, TickStatus tickStatus) : RefCounted
+	public partial class GridState : RefCounted
 	{
-		public byte[] Grid { get; } = (byte[])grid.Clone();
-		public byte[] Neighbors { get; } = (byte[])neighbors.Clone();
-		public byte[] SectionGrid { get; } = (byte[])sectionGrid.Clone();
-		public TickStatus TickState = tickStatus;
+		public byte[] Grid { get; } =
+			new byte[Settings.Instance.Game.GridSize.X * Settings.Instance.Game.GridSize.Y];
+
+		public byte[] Neighbors { get; } =
+			new byte[Settings.Instance.Game.GridSize.X * Settings.Instance.Game.GridSize.Y];
+
+		public byte[] SectionGrid { get; } =
+			new byte[Settings.Instance.Game.SectionGridSize.X * Settings.Instance.Game.SectionGridSize.Y];
+
+		public static void Copy(GridState from, GridState to)
+		{
+			from.Grid.AsSpan().CopyTo(to.Grid);
+			from.Neighbors.AsSpan().CopyTo(to.Neighbors);
+			from.SectionGrid.AsSpan().CopyTo(to.SectionGrid);
+		}
+		
+		public static GridState Default
+		{
+			get
+			{
+				var state = new GridState();
+				
+				System.Array.Fill(state.Grid, (byte)0);
+				System.Array.Fill(state.Neighbors, (byte)0);
+				System.Array.Fill(state.SectionGrid, (byte)SectionFlag.Draw);
+
+				return state;
+			}
+		}
 	}
+	
+	public CircularArray<GridState> StateBuffer;
+	public byte[] Grid => StateBuffer.Head.Grid;
+	public byte[] Neighbors => StateBuffer.Head.Neighbors;
+	public byte[] SectionGrid => StateBuffer.Head.SectionGrid;
+	
+	public bool IsBufferLoaded;
 	
 	public byte[] Brush = new byte[25];
-	public byte[] Grid = [];
-	public byte[] Neighbors = [];
-	public byte[] SectionGrid = [];
-	public TickStatus TickState = TickStatus.DrawOnly;
-	
     public Array<Array<Array<Vector2I>>> SectionNeighbors = [];
-    
-    public LinkedList<GridState> UndoStack = new();
-    public GridState Snapshot => UndoStack.First?.Value;
-    
+
+    public GridState Current => IsBufferLoaded ? StateBuffer[-1] : StateBuffer.Head;
+
     public bool IsPaused = false;
     public float UpdateSpeed;
 
@@ -61,71 +71,95 @@ public partial class GameState : Node
         Instance = this;
     }
 
-    public void SetDataCell(DataType data, Vector2I pos,  byte value)
+    public void Init()
     {
-	    switch (data)
-	    {
-		    case DataType.Brush:
-			    Brush[GridUtils.GetPackedIndex(new Vector2I(5, 5), pos)] = value;
-			    break;
-		    case DataType.Grid:
-			    Grid[GridUtils.GetPackedIndex(Settings.Instance.Game.GridSize, pos)] = value;
-			    break;
-		    case DataType.Neighbors:
-			    Neighbors[GridUtils.GetPackedIndex(Settings.Instance.Game.GridSize, pos)] = value;
-			    break;
-		    case DataType.SectionGrid:
-			    SectionGrid[GridUtils.GetPackedIndex(Settings.Instance.Game.SectionGridSize, pos)] = value;
-			    break;
-	    }
-    }
-    
-    public bool CanUndo()
-    {
-	    return UndoStack.Count > 1;
-    }
-    
-    public void ResetUndo()
-    {
-	    UndoStack.Clear();
-    }
-    
-    public void PushUndo()
-    {
-	    if (UndoStack.Count >= Settings.Instance.Game.UndoCount)
-		    UndoStack.RemoveLast();
-	    UndoStack.AddFirst(new GridState(Grid, Neighbors, SectionGrid, TickState));
+	    _initSectionNeighbors();
+	    StateBuffer = new CircularArray<GridState>(
+		    Settings.Instance.Game.UndoCount + 2, 
+		    () => new GridState());
+	    StateBuffer.Save(GridState.Default, GridState.Copy);
+	    IsBufferLoaded = true;
     }
 
+    private void _initSectionNeighbors()
+    {
+	    SectionNeighbors.Resize(Settings.Instance.Game.GridSize.X);
+	    for (var i = 0; i < Settings.Instance.Game.GridSize.X; i++)
+	    {
+		    SectionNeighbors[i] = [];
+		    SectionNeighbors[i].Resize(Settings.Instance.Game.GridSize.Y);
+		    var subI = i / Settings.Instance.Game.SectionSize.X;
+		    for (var j = 0; j < Settings.Instance.Game.GridSize.Y; j++)
+		    {
+			    SectionNeighbors[i][j] = [];
+			    var subJ =  j / Settings.Instance.Game.SectionSize.Y;
+			    if (subI > 0 && i == subI * Settings.Instance.Game.SectionSize.X)
+			    {
+				    SectionNeighbors[i][j].Add(new Vector2I(subI - 1, subJ));
+				    if (subJ > 0 && j == subJ * Settings.Instance.Game.SectionSize.Y)
+					    SectionNeighbors[i][j].Add(new Vector2I(subI - 1, subJ - 1));
+				    else if (subJ < Settings.Instance.Game.SectionGridSize.Y - 1 && 
+				             j == (subJ + 1) * Settings.Instance.Game.SectionSize.Y - 1)
+					    SectionNeighbors[i][j].Add(new Vector2I(subI - 1, subJ + 1));
+			    }
+			    else if (subI < Settings.Instance.Game.SectionGridSize.X - 1 && 
+			             i == (subI + 1) * Settings.Instance.Game.SectionSize.X - 1)
+			    {
+				    SectionNeighbors[i][j].Add(new Vector2I(subI + 1, subJ));
+				    if (subJ > 0 && j == subJ * Settings.Instance.Game.SectionSize.Y)
+					    SectionNeighbors[i][j].Add(new Vector2I(subI + 1, subJ - 1));
+				    else if (subJ < Settings.Instance.Game.SectionGridSize.Y - 1 && 
+				             j == (subJ + 1) * Settings.Instance.Game.SectionSize.Y - 1)
+					    SectionNeighbors[i][j].Add(new Vector2I(subI + 1, subJ + 1));
+			    }
+
+			    if (subJ > 0 && j == subJ * Settings.Instance.Game.SectionSize.Y)
+				    SectionNeighbors[i][j].Add(new Vector2I(subI, subJ - 1));
+			    else if (subJ < Settings.Instance.Game.SectionGridSize.Y - 1 && 
+			             j == (subJ + 1) * Settings.Instance.Game.SectionSize.Y - 1)
+				    SectionNeighbors[i][j].Add(new Vector2I(subI, subJ + 1));
+		    }
+	    }
+    }
+
+    public void EditBrush(Vector2I pos, byte value)
+    {
+	    Brush[GridUtils.GetPackedIndex(new Vector2I(5, 5), pos)] = value;
+    }
+    
+    public void ClearStateBuffer()
+    {
+	    StateBuffer.Clear();
+	    StateBuffer.Save(GridState.Default, GridState.Copy);
+	    IsBufferLoaded = true;
+    }
+    
+    public void SaveState()
+    {
+	    StateBuffer.Save(StateBuffer.Head, GridState.Copy);
+    }
+
+    public bool CanUndo()
+    {
+	    return StateBuffer.Count > 2 + (IsBufferLoaded ? 1 : 0);
+    }
+    
+    public void DiscardBuffer()
+    {
+	    StateBuffer.RemoveTop();
+	    IsBufferLoaded = false;
+    }
+    
     public void Undo()
     {
 	    if (!CanUndo()) return;
-	    UndoStack.RemoveFirst();
-	    PopUndo();
-    }
-
-    public void PopUndo()
-    {
-	    if (UndoStack.Count < 1) return;
-	    var snapshot = UndoStack.First!.Value;
-	    TickState = snapshot.TickState;
-	    Grid = (byte[])snapshot.Grid.Clone();
-	    Neighbors = (byte[])snapshot.Neighbors.Clone();
+	    DiscardBuffer();
 	    
-	    var oldSectionGrid = (byte[])SectionGrid.Clone();
-	    SectionGrid = (byte[])snapshot.SectionGrid.Clone();
+	    var oldSectionGrid = SectionGrid;
+	    StateBuffer.RemoveTop();
 	    for (var i = 0; i < SectionGrid.Length; i++)
 		    SectionGrid[i] |= (byte)(oldSectionGrid[i] & (byte)SectionFlag.Draw);
-	    UndoStack.RemoveFirst();
+	    IsBufferLoaded = true;
     }
-
-    public void RevertToSnapshot()
-    {
-	    if (UndoStack.Count < 1) return;
-	    var snapshot = UndoStack.First!.Value;
-	    TickState = snapshot.TickState;
-	    Grid = (byte[])snapshot.Grid.Clone();
-	    Neighbors = (byte[])snapshot.Neighbors.Clone();
-	    SectionGrid = (byte[])snapshot.SectionGrid.Clone();
-    }
+    
 }

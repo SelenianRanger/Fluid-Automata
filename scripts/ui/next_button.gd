@@ -11,4 +11,7 @@ func _process(delta: float) -> void:
 	pass
 
 func _on_pause_changed() -> void:
-	disabled = !GameState.IsPaused
+	disabled = !GameState.IsPaused || !GameState.IsBufferLoaded
+
+func _on_undo_changed() -> void:
+	disabled = !GameState.IsPaused || !GameState.IsBufferLoaded

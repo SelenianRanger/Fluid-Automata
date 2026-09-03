@@ -10,33 +10,6 @@ enum DrawingStatus {
 }
 
 var _draw_state = DrawingStatus.IDLE
-
-func set_paused(state : bool):
-	if(GameState.IsPaused == state):
-		return
-	GameState.IsPaused = state
-	$PauseOverlay.visible = state
-	emit_signal("pause_changed")
-	
-func paint_grid(pos, color, single_mode = false):
-	if(single_mode):
-		$Grid.SetTile(pos, color)
-		$GameGrid.set_cell(pos - Vector2i.ONE, 0, Vector2i(color, 0))
-		return;
-		
-	for i in range(-2, 3):
-			var x = pos.x + i
-			if(x < 1 || x > Settings.Game.GridSize.x - 2):
-				continue
-			for j in range(-2, 3):
-				var y = pos.y + j
-				if(y < 1 || y > Settings.Game.GridSize.y - 2):
-					continue
-				var index = GridUtils.GetPackedIndex(Vector2i(5, 5), Vector2i(i + 2, j + 2))
-				if(GameState.Brush[index] == 0):
-					continue
-				$Grid.SetTile(Vector2i(x, y), color)
-				$GameGrid.set_cell(Vector2i(x, y) - Vector2i.ONE, 0, Vector2i(color, 0))
 	
 func _input(event: InputEvent) -> void:
 	if(Input.is_action_just_pressed("restart")):
@@ -59,28 +32,55 @@ func _input(event: InputEvent) -> void:
 	
 	if(_draw_state == DrawingStatus.IDLE):
 		if (Input.is_action_just_pressed("cell_paint")):
-				_draw_state = DrawingStatus.DRAWING
-				$Grid.RevertBuffer()
+			_draw_state = DrawingStatus.DRAWING
+			$Grid.OnPaintStart()
 		elif (Input.is_action_just_pressed("cell_erase")):
 			_draw_state = DrawingStatus.ERASING
-			$Grid.RevertBuffer()
+			$Grid.OnPaintStart()
 	match _draw_state:
 		DrawingStatus.DRAWING:
 			if (Input.is_action_just_released("cell_paint")):
 				_draw_state = DrawingStatus.IDLE
-				GameState.PushUndo()
+				$Grid.OnPaintEnd()
 				emit_signal("undo_changed")
-				$Grid.BufferNextFrame()
 			elif(Input.is_action_pressed("cell_paint")):
 				paint_grid(mouse_coords, 1, Input.is_action_pressed("shift_modifier"))
 		DrawingStatus.ERASING:
 			if (Input.is_action_just_released("cell_erase")):
 				_draw_state = DrawingStatus.IDLE
-				GameState.PushUndo()
+				$Grid.OnPaintEnd()
 				emit_signal("undo_changed")
-				$Grid.BufferNextFrame()
 			elif(Input.is_action_pressed("cell_erase")):
 				paint_grid(mouse_coords, 0, Input.is_action_pressed("shift_modifier"))
+
+func set_paused(state : bool):
+	if(GameState.IsPaused == state):
+		return
+	GameState.IsPaused = state
+	$PauseOverlay.visible = state
+	emit_signal("pause_changed")
+	
+func paint_grid(pos, color, single_mode = false):
+	if(single_mode):
+		$Grid.SetTile(pos, color)
+		$GameGrid.set_cell(pos - Vector2i.ONE, 0, Vector2i(color, 0))
+	else:
+		apply_brush(pos, color)
+
+func apply_brush(pos, color):
+	for i in range(-2, 3):
+			var x = pos.x + i
+			if(x < 1 || x > Settings.Game.GridSize.x - 2):
+				continue
+			for j in range(-2, 3):
+				var y = pos.y + j
+				if(y < 1 || y > Settings.Game.GridSize.y - 2):
+					continue
+				var index = GridUtils.GetPackedIndex(Vector2i(5, 5), Vector2i(i + 2, j + 2))
+				if(GameState.Brush[index] == 0):
+					continue
+				$Grid.SetTile(Vector2i(x, y), color)
+				$GameGrid.set_cell(Vector2i(x, y) - Vector2i.ONE, 0, Vector2i(color, 0))
 
 func update_camera() -> void:
 	$Camera2D.update_camera()
@@ -127,5 +127,5 @@ func _on_load_map_from_file(path: String) -> void:
 
 func _on_save_map_to_file(path: String) -> void:
 	var file = FileAccess.open(path, FileAccess.WRITE)
-	file.store_buffer(GameState.Snapshot.Grid)
+	file.store_buffer(GameState.Current.Grid)
 	file.close()

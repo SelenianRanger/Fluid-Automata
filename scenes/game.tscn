@@ -20,6 +20,9 @@ sources/0 = SubResource("TileSetAtlasSource_4vge2")
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0tnpc"]
 texture = ExtResource("6_gee14")
 0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_ex45t"]
 sources/0 = SubResource("TileSetAtlasSource_0tnpc")
@@ -43,7 +46,8 @@ script = ExtResource("4_4vge2")
 
 [node name="SectionOverlay" type="TileMapLayer" parent="." unique_id=780431548]
 visible = false
-modulate = Color(1, 1, 1, 0.19607843)
+modulate = Color(1, 1, 1, 0.1254902)
+texture_filter = 1
 position = Vector2(-16, -16)
 tile_set = SubResource("TileSet_ex45t")
 script = ExtResource("6_u5sy4")

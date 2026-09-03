@@ -10,11 +10,11 @@
 [ext_resource type="Texture2D" uid="uid://4ojxcn8f6iqh" path="res://assets/icons/pause.png" id="4_choun"]
 [ext_resource type="Texture2D" uid="uid://bo0rg8nf2fipq" path="res://assets/icons/reset.png" id="4_tefeu"]
 [ext_resource type="Script" uid="uid://2m0vsktxjfbp" path="res://scripts/ui/pause_button.gd" id="5_choun"]
-[ext_resource type="Script" uid="uid://c2nvk7nm8i1mb" path="res://scripts/ui/undo_button.gd" id="5_jkv2x"]
+[ext_resource type="Script" uid="uid://c2nvk7nm8i1mb" path="res://scripts/ui/previous_button.gd" id="5_jkv2x"]
 [ext_resource type="Texture2D" uid="uid://df2yl4d5lyhh1" path="res://assets/icons/import.png" id="5_tipki"]
 [ext_resource type="Texture2D" uid="uid://bnlo5naro1fq0" path="res://assets/icons/save.png" id="6_85g3d"]
 [ext_resource type="Texture2D" uid="uid://b5sfrlekcrxji" path="res://assets/icons/next.png" id="6_eb6dy"]
-[ext_resource type="Script" uid="uid://bgug5px0fk42i" path="res://scripts/ui/next_frame_button.gd" id="7_trceg"]
+[ext_resource type="Script" uid="uid://bgug5px0fk42i" path="res://scripts/ui/next_button.gd" id="7_trceg"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0wfyh"]
 texture = ExtResource("3_4vge2")
@@ -147,7 +147,7 @@ layout_mode = 2
 [node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer" unique_id=399735059]
 layout_mode = 2
 
-[node name="UndoButton" type="Button" parent="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer" unique_id=1936803897]
+[node name="PreviousButton" type="Button" parent="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer" unique_id=1936803897]
 custom_minimum_size = Vector2(35, 35)
 custom_maximum_size = Vector2(35, 35)
 layout_mode = 2
@@ -172,7 +172,7 @@ icon_alignment = 1
 expand_icon = true
 script = ExtResource("5_choun")
 
-[node name="NextFrameButton" type="Button" parent="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer" unique_id=1373787982]
+[node name="NextButton" type="Button" parent="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer" unique_id=1373787982]
 custom_minimum_size = Vector2(35, 35)
 custom_maximum_size = Vector2(35, 35)
 layout_mode = 2
@@ -354,17 +354,18 @@ icon_alignment = 1
 expand_icon = true
 
 [connection signal="resized" from="game/SubViewportContainer" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_viewport_resized"]
-[connection signal="pause_changed" from="game/SubViewportContainer/SubViewport/GameScn" to="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/UndoButton" method="_on_pause_changed"]
+[connection signal="pause_changed" from="game/SubViewportContainer/SubViewport/GameScn" to="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/PreviousButton" method="_on_pause_changed"]
 [connection signal="pause_changed" from="game/SubViewportContainer/SubViewport/GameScn" to="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/PauseButton" method="_on_pause_changed"]
-[connection signal="pause_changed" from="game/SubViewportContainer/SubViewport/GameScn" to="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/NextFrameButton" method="_on_pause_changed"]
-[connection signal="undo_changed" from="game/SubViewportContainer/SubViewport/GameScn" to="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/UndoButton" method="_on_undo_changed"]
+[connection signal="pause_changed" from="game/SubViewportContainer/SubViewport/GameScn" to="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/NextButton" method="_on_pause_changed"]
+[connection signal="undo_changed" from="game/SubViewportContainer/SubViewport/GameScn" to="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/PreviousButton" method="_on_undo_changed"]
+[connection signal="undo_changed" from="game/SubViewportContainer/SubViewport/GameScn" to="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/NextButton" method="_on_undo_changed"]
 [connection signal="file_selected" from="game/SubViewportContainer/SubViewport/GameScn/LoadMapDialog" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_load_map_from_file"]
 [connection signal="file_selected" from="game/SubViewportContainer/SubViewport/GameScn/SaveMapDialog" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_save_map_to_file"]
 [connection signal="value_changed" from="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer2/CenterContainer/HBoxContainer/HSlider" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_speed_changed"]
 [connection signal="value_changed" from="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer2/CenterContainer/HBoxContainer/HSlider" to="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer2/CenterContainer/HBoxContainer/Label2" method="_on_h_slider_value_changed"]
-[connection signal="pressed" from="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/UndoButton" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_undo_pressed"]
+[connection signal="pressed" from="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/PreviousButton" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_undo_pressed"]
 [connection signal="toggled" from="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/PauseButton" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_pause_toggled"]
-[connection signal="pressed" from="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/NextFrameButton" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_next_frame_pressed"]
+[connection signal="pressed" from="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/NextButton" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_next_frame_pressed"]
 [connection signal="pressed" from="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/MarginContainer/ResetMapButton" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_reset_pressed"]
 [connection signal="file_selected" from="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer/LoadBrushDialog" to="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" method="_on_load_brush_from_file"]
 [connection signal="file_selected" from="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer/SaveBrushDialog" to="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" method="_on_save_brush_to_file"]

@@ -13,90 +13,50 @@ public partial class GameGrid : Node
 	public override void _Ready()
 	{
 		var timer = GetNode<Timer>("Timer");
-		Init();
-		UpdateTick();
 		timer.Timeout += UpdateTick;
 		timer.WaitTime = 1f / Settings.Instance.Game.UpdateSpeed;
+		GameState.Instance.Init();
+		UpdateTick();
 		timer.Start();
-	}
-	
-	private void Init()
-	{
-		Array.Resize(ref GameState.Instance.Grid, 
-			Settings.Instance.Game.GridSize.X * Settings.Instance.Game.GridSize.Y);
-		Array.Resize(ref GameState.Instance.Neighbors, 
-			Settings.Instance.Game.GridSize.X * Settings.Instance.Game.GridSize.Y);
-		Array.Resize(ref GameState.Instance.SectionGrid, 
-			Settings.Instance.Game.SectionGridSize.X * Settings.Instance.Game.SectionGridSize.Y);
-		Array.Fill(GameState.Instance.Grid, (byte)0);
-		Array.Fill(GameState.Instance.Neighbors, (byte)0);
-		Array.Fill(GameState.Instance.SectionGrid, (byte)GameState.SectionFlag.Draw);
-
-		GameState.Instance.SectionNeighbors.Resize(Settings.Instance.Game.GridSize.X);
-		for (var i = 0; i < Settings.Instance.Game.GridSize.X; i++)
-		{
-			GameState.Instance.SectionNeighbors[i] = [];
-			GameState.Instance.SectionNeighbors[i].Resize(Settings.Instance.Game.GridSize.Y);
-			var subI = i / Settings.Instance.Game.SectionSize.X;
-			for (var j = 0; j < Settings.Instance.Game.GridSize.Y; j++)
-			{
-				GameState.Instance.SectionNeighbors[i][j] = [];
-				var subJ =  j / Settings.Instance.Game.SectionSize.Y;
-				if (subI > 0 && i == subI * Settings.Instance.Game.SectionSize.X)
-				{
-					GameState.Instance.SectionNeighbors[i][j].Add(new Vector2I(subI - 1, subJ));
-					if (subJ > 0 && j == subJ * Settings.Instance.Game.SectionSize.Y)
-						GameState.Instance.SectionNeighbors[i][j].Add(new Vector2I(subI - 1, subJ - 1));
-					else if (subJ < Settings.Instance.Game.SectionGridSize.Y - 1 && 
-					         j == (subJ + 1) * Settings.Instance.Game.SectionSize.Y - 1)
-						GameState.Instance.SectionNeighbors[i][j].Add(new Vector2I(subI - 1, subJ + 1));
-				}
-				else if (subI < Settings.Instance.Game.SectionGridSize.X - 1 && 
-				         i == (subI + 1) * Settings.Instance.Game.SectionSize.X - 1)
-				{
-					GameState.Instance.SectionNeighbors[i][j].Add(new Vector2I(subI + 1, subJ));
-					if (subJ > 0 && j == subJ * Settings.Instance.Game.SectionSize.Y)
-						GameState.Instance.SectionNeighbors[i][j].Add(new Vector2I(subI + 1, subJ - 1));
-					else if (subJ < Settings.Instance.Game.SectionGridSize.Y - 1 && 
-					         j == (subJ + 1) * Settings.Instance.Game.SectionSize.Y - 1)
-						GameState.Instance.SectionNeighbors[i][j].Add(new Vector2I(subI + 1, subJ + 1));
-				}
-
-				if (subJ > 0 && j == subJ * Settings.Instance.Game.SectionSize.Y)
-					GameState.Instance.SectionNeighbors[i][j].Add(new Vector2I(subI, subJ - 1));
-				else if (subJ < Settings.Instance.Game.SectionGridSize.Y - 1 && 
-				         j == (subJ + 1) * Settings.Instance.Game.SectionSize.Y - 1)
-					GameState.Instance.SectionNeighbors[i][j].Add(new Vector2I(subI, subJ + 1));
-			}
-		}
 	}
 
 	public void ResetGrid()
 	{
-		Array.Fill(GameState.Instance.Grid, (byte)0);
-		Array.Fill(GameState.Instance.SectionGrid, (byte)GameState.SectionFlag.Draw);
-		GameState.Instance.ResetUndo();
-		GameState.Instance.TickState = GameState.TickStatus.DrawOnly;
+		GameState.Instance.ClearStateBuffer();
 		UpdateTick();
 	}
 	
 	public void ResetGrid(byte[] fill)
 	{
+		GameState.Instance.ClearStateBuffer();
 		fill.AsSpan().CopyTo(GameState.Instance.Grid);
 		Array.Fill(GameState.Instance.SectionGrid, 
 			(byte)(GameState.SectionFlag.Draw | GameState.SectionFlag.Process));
-		GameState.Instance.ResetUndo();
-		GameState.Instance.TickState = GameState.TickStatus.FullTick;
 		UpdateTick();
 	}
 
+	public void OnPaintStart()
+	{
+		if (GameState.Instance.IsBufferLoaded)
+		{
+			GameState.Instance.DiscardBuffer();
+			GameState.Instance.SaveState();
+		}
+		PostDrawCleanup();
+	}
+
+	public void OnPaintEnd()
+	{
+		GameState.Instance.SaveState();
+		BufferNextFrame();
+	}
+	
 	public void SetTile(Vector2I pos, byte value)
 	{
 		var index = GridUtils.GetPackedIndex(Settings.Instance.Game.GridSize, pos);
 		if (GameState.Instance.Grid[index] == value) return;
 		GameState.Instance.Grid[index] = value;
-		MarkSection(pos, false);
-		GameState.Instance.TickState = GameState.TickStatus.FullTick;
+		MarkSection(pos);
 		EmitSignal(SignalName.OverlaysUpdated);
 	}
 	
@@ -106,16 +66,14 @@ public partial class GameGrid : Node
 			MarkSection(pos);
 	}
 	
-	public void MarkSection(Vector2I pos, bool markDraw = true)
+	private void MarkSection(Vector2I pos, bool markDraw = true)
 	{
 		var subI = pos.X /  Settings.Instance.Game.SectionSize.Y;
 		var subJ = pos.Y /  Settings.Instance.Game.SectionSize.Y;
 		var index = GridUtils.GetPackedIndex(Settings.Instance.Game.SectionGridSize,
 			new Vector2I(subI, subJ));
-		if (markDraw)
-			GameState.Instance.SectionGrid[index] |= (byte)GameState.SectionFlag.Draw;
-		GameState.Instance.SectionGrid[index] |= (byte)GameState.SectionFlag.Process;
 		
+		GameState.Instance.SectionGrid[index] |= (byte)(GameState.SectionFlag.Draw | GameState.SectionFlag.Process);
 		foreach (var neighbor in GameState.Instance.SectionNeighbors[pos.X][pos.Y])
 		{
 			index = GridUtils.GetPackedIndex(Settings.Instance.Game.SectionGridSize,  neighbor);
@@ -168,8 +126,8 @@ public partial class GameGrid : Node
 		
 		for (var i = i1; i < i2; i++)
 		for (var j = j1; j < j2; j++) UpdateTile(new Vector2I(i, j));
-		if ((GameState.Instance.SectionGrid[index] & (byte)GameState.SectionFlag.Process) != 0)
-			GameState.Instance.TickState = GameState.TickStatus.FullTick;
+		if ((GameState.Instance.SectionGrid[index] & (byte)GameState.SectionFlag.Draw) != 0)
+			GameState.Instance.IsBufferLoaded = true;
 	}
 
 	public void UpdateNeighbors()
@@ -192,19 +150,13 @@ public partial class GameGrid : Node
 		UpdateTick();
 	}
 	
-	public void RevertBuffer()
-	{
-		GameState.Instance.RevertToSnapshot();
-	}
-	
 	public void BufferNextFrame()
 	{
-		GameState.Instance.TickState = GameState.TickStatus.DrawOnly;
 		UpdateNeighbors();
 		UpdateGrid();
 	}
 
-	private void PostDrawCleanup()
+	public void PostDrawCleanup()
 	{
 		for (var i = 0; i < GameState.Instance.SectionGrid.Length; i++)
 			GameState.Instance.SectionGrid[i] &= (byte)~GameState.SectionFlag.Draw;
@@ -212,17 +164,12 @@ public partial class GameGrid : Node
 	
 	public void UpdateTick()
 	{
-		if (GameState.Instance.TickState == GameState.TickStatus.Idle) return;
-		GameState.Instance.PushUndo();
+		if (!GameState.Instance.IsBufferLoaded) return;
 		EmitSignal(SignalName.OverlaysUpdated);
 		EmitSignal(SignalName.GridUpdated);
+		GameState.Instance.SaveState();
+		GameState.Instance.IsBufferLoaded = false;
 		PostDrawCleanup();
-		if(GameState.Instance.TickState == GameState.TickStatus.DrawOnly)
-		{
-			GameState.Instance.TickState = GameState.TickStatus.Idle;
-			return;
-		}
-		
 		BufferNextFrame();
 	}
 	
