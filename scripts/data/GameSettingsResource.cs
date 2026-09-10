@@ -1,7 +1,7 @@
 using Godot;
 
 [GlobalClass]
-public partial class SettingsGame : Resource
+public partial class GameSettingsResource : Resource
 {
     [Export] 
     public Vector2I GridSize = new(200, 200);

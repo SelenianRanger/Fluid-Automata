@@ -2,19 +2,26 @@
 
 [ext_resource type="PackedScene" uid="uid://cpdoxjk3cd4fk" path="res://scenes/game.tscn" id="1_o5qli"]
 [ext_resource type="Script" uid="uid://bc4nocmf6q063" path="res://scripts/main.gd" id="1_ya4ey"]
-[ext_resource type="Script" uid="uid://mqh63gn3okrv" path="res://scripts/ui/label_spd.gd" id="2_jyhfs"]
+[ext_resource type="Script" uid="uid://mqh63gn3okrv" path="res://scripts/ui/top_panel/speed_label.gd" id="2_jyhfs"]
 [ext_resource type="Texture2D" uid="uid://cajac07k1oj7b" path="res://assets/tilesets/cells.png" id="3_4vge2"]
 [ext_resource type="Texture2D" uid="uid://80ojffia1y5y" path="res://assets/icons/overlays.png" id="3_jkv2x"]
-[ext_resource type="Script" uid="uid://bewrh3atgl1qc" path="res://scripts/ui/brush_tile_map.gd" id="3_sugp2"]
-[ext_resource type="Texture2D" uid="uid://bw7fu47dt4v8j" path="res://assets/icons/previous.png" id="4_a8y0u"]
+[ext_resource type="Script" uid="uid://bewrh3atgl1qc" path="res://scripts/ui/top_panel/brush_tile_map.gd" id="3_sugp2"]
+[ext_resource type="Texture2D" uid="uid://bw7fu47dt4v8j" path="res://assets/icons/first.png" id="4_a8y0u"]
 [ext_resource type="Texture2D" uid="uid://4ojxcn8f6iqh" path="res://assets/icons/pause.png" id="4_choun"]
 [ext_resource type="Texture2D" uid="uid://bo0rg8nf2fipq" path="res://assets/icons/reset.png" id="4_tefeu"]
-[ext_resource type="Script" uid="uid://2m0vsktxjfbp" path="res://scripts/ui/pause_button.gd" id="5_choun"]
-[ext_resource type="Script" uid="uid://c2nvk7nm8i1mb" path="res://scripts/ui/previous_button.gd" id="5_jkv2x"]
+[ext_resource type="Script" uid="uid://2m0vsktxjfbp" path="res://scripts/ui/bottom_panel/pause_button.gd" id="5_choun"]
+[ext_resource type="Script" uid="uid://c2nvk7nm8i1mb" path="res://scripts/ui/bottom_panel/previous_button.gd" id="5_jkv2x"]
 [ext_resource type="Texture2D" uid="uid://df2yl4d5lyhh1" path="res://assets/icons/import.png" id="5_tipki"]
 [ext_resource type="Texture2D" uid="uid://bnlo5naro1fq0" path="res://assets/icons/save.png" id="6_85g3d"]
-[ext_resource type="Texture2D" uid="uid://b5sfrlekcrxji" path="res://assets/icons/next.png" id="6_eb6dy"]
-[ext_resource type="Script" uid="uid://bgug5px0fk42i" path="res://scripts/ui/next_button.gd" id="7_trceg"]
+[ext_resource type="Texture2D" uid="uid://c8w62yqj1nlg5" path="res://assets/icons/next.png" id="6_eb6dy"]
+[ext_resource type="Script" uid="uid://bgug5px0fk42i" path="res://scripts/ui/bottom_panel/next_button.gd" id="7_trceg"]
+[ext_resource type="Script" uid="uid://cw28xwupelw3a" path="res://scripts/ui/top_panel/speed_slider.gd" id="9_jscy8"]
+[ext_resource type="Script" uid="uid://wvknyd1m7btu" path="res://scripts/ui/bottom_panel/timeline_slider.gd" id="10_gqmmt"]
+[ext_resource type="Script" uid="uid://ccm2e3xbye1vi" path="res://scripts/ui/bottom_panel/first_button.gd" id="10_jbj1t"]
+[ext_resource type="Script" uid="uid://b2e78echsu37f" path="res://scripts/ui/bottom_panel/label_frame.gd" id="11_yc10j"]
+[ext_resource type="Texture2D" uid="uid://d2jhmcujay0qn" path="res://assets/icons/previous.png" id="12_0ld40"]
+[ext_resource type="Script" uid="uid://ct4ohaiexdpo2" path="res://scripts/ui/bottom_panel/last_button.gd" id="17_muem4"]
+[ext_resource type="Texture2D" uid="uid://b5sfrlekcrxji" path="res://assets/icons/last.png" id="18_gqmmt"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0wfyh"]
 texture = ExtResource("3_4vge2")
@@ -39,6 +46,7 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = 45.0
+offset_bottom = -45.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -52,7 +60,7 @@ stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="game/SubViewportContainer" unique_id=1874034681]
 handle_input_locally = false
-size = Vector2i(800, 800)
+size = Vector2i(800, 755)
 render_target_update_mode = 4
 
 [node name="GameScn" parent="game/SubViewportContainer/SubViewport" unique_id=1808051195 instance=ExtResource("1_o5qli")]
@@ -75,48 +83,171 @@ use_native_dialog = true
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=2017499129]
 
 [node name="ui" type="Control" parent="CanvasLayer" unique_id=1020230226]
-custom_minimum_size = Vector2(800, 0)
-custom_maximum_size = Vector2(1000, -1)
 layout_mode = 3
-anchors_preset = 10
+anchors_preset = 15
 anchor_right = 1.0
-offset_bottom = 45.0
+anchor_bottom = 1.0
 grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="CanvasLayer/ui" unique_id=1029504402]
+[node name="TopPanel" type="Control" parent="CanvasLayer/ui" unique_id=412679203]
+custom_minimum_size = Vector2(800, 0)
+custom_maximum_size = Vector2(1000, -1)
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 45.0
 grow_horizontal = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/ui/PanelContainer" unique_id=577256527]
-layout_mode = 2
-theme_override_constants/margin_left = 120
+[node name="Panel" type="Panel" parent="CanvasLayer/ui/TopPanel" unique_id=1108685835]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/ui/PanelContainer/MarginContainer" unique_id=1333043563]
-layout_mode = 2
-alignment = 1
-
-[node name="MarginContainer2" type="MarginContainer" parent="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer" unique_id=377045907]
-layout_mode = 2
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/ui/TopPanel" unique_id=866953754]
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 1
+anchors_preset = -1
+anchor_bottom = 1.0
+offset_right = 210.0
+mouse_filter = 2
 theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 8
 
-[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer2" unique_id=1794131395]
+[node name="FoldableContainer" type="FoldableContainer" parent="CanvasLayer/ui/TopPanel/MarginContainer" unique_id=1093982107]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+focus_mode = 0
+folded = true
+title = "Brush"
+title_alignment = 1
+
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer" unique_id=106986063]
+visible = false
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer2/CenterContainer" unique_id=267493631]
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer" unique_id=1167572177]
 layout_mode = 2
 alignment = 1
 
-[node name="Label" type="Label" parent="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer2/CenterContainer/HBoxContainer" unique_id=242178581]
+[node name="SubViewportContainer" type="SubViewportContainer" parent="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer" unique_id=887282187]
+layout_mode = 2
+
+[node name="SubViewport" type="SubViewport" parent="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer" unique_id=1532299737]
+handle_input_locally = false
+size = Vector2i(160, 160)
+render_target_update_mode = 0
+
+[node name="BrushTileMapLayer" type="TileMapLayer" parent="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport" unique_id=1489927147]
+scale = Vector2(2, 2)
+tile_map_data = PackedByteArray("AAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAABAAEAAAABAAAAAAACAAEAAAABAAAAAAACAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAIAAAAAAAAAAAABAAIAAAABAAAAAAADAAEAAAAAAAAAAAADAAAAAAAAAAAAAAADAAIAAAABAAAAAAADAAMAAAAAAAAAAAACAAMAAAABAAAAAAABAAMAAAAAAAAAAAAAAAMAAAAAAAAAAAAEAAAAAAAAAAAAAAAEAAEAAAAAAAAAAAAEAAIAAAAAAAAAAAAEAAMAAAAAAAAAAAAEAAQAAAAAAAAAAAADAAQAAAAAAAAAAAACAAQAAAAAAAAAAAABAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAACAAIAAAAAAAAAAAA=")
+tile_set = SubResource("TileSet_keve6")
+script = ExtResource("3_sugp2")
+
+[node name="LoadBrushDialog" type="FileDialog" parent="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" unique_id=595352107]
+title = "Open a File"
+file_mode = 0
+display_mode = 1
+access = 2
+filters = PackedStringArray("*.brush")
+use_native_dialog = true
+
+[node name="SaveBrushDialog" type="FileDialog" parent="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" unique_id=1384218773]
+title = "Save Cursor"
+display_mode = 1
+access = 2
+filters = PackedStringArray("*.brush")
+use_native_dialog = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer" unique_id=525203878]
+layout_mode = 2
+alignment = 1
+
+[node name="LoadBrushButton" type="Button" parent="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/HBoxContainer" unique_id=255453109]
+custom_minimum_size = Vector2(35, 35)
+custom_maximum_size = Vector2(35, 35)
+layout_mode = 2
+tooltip_text = "Load Brush"
+focus_mode = 0
+icon = ExtResource("5_tipki")
+icon_alignment = 1
+expand_icon = true
+
+[node name="SaveBrushButton" type="Button" parent="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/HBoxContainer" unique_id=737644124]
+custom_minimum_size = Vector2(35, 35)
+custom_maximum_size = Vector2(35, 35)
+layout_mode = 2
+tooltip_text = "Save Brush"
+focus_mode = 0
+icon = ExtResource("6_85g3d")
+icon_alignment = 1
+expand_icon = true
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/HBoxContainer" unique_id=357403993]
+layout_mode = 2
+theme_override_constants/margin_left = 45
+
+[node name="ResetBrushButton" type="Button" parent="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/HBoxContainer/MarginContainer" unique_id=1609683271]
+custom_minimum_size = Vector2(35, 35)
+custom_maximum_size = Vector2(35, 35)
+layout_mode = 2
+tooltip_text = "Reset Brush"
+focus_mode = 0
+icon = ExtResource("4_tefeu")
+icon_alignment = 1
+expand_icon = true
+
+[node name="MarginContainer2" type="MarginContainer" parent="CanvasLayer/ui/TopPanel" unique_id=1316299469]
+custom_minimum_size = Vector2(0, 45)
+custom_maximum_size = Vector2(-1, 45)
+layout_mode = 1
+anchors_preset = -1
+anchor_bottom = 1.0
+offset_right = 265.0
+size_flags_horizontal = 0
+mouse_filter = 2
+theme_override_constants/margin_left = 230
+
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/ui/TopPanel/MarginContainer2" unique_id=1613800938]
+layout_mode = 2
+
+[node name="OverlayButton" type="Button" parent="CanvasLayer/ui/TopPanel/MarginContainer2/CenterContainer" unique_id=1052449595]
+custom_minimum_size = Vector2(35, 35)
+custom_maximum_size = Vector2(35, 35)
+layout_mode = 2
+tooltip_text = "Overlays"
+focus_mode = 0
+toggle_mode = true
+icon = ExtResource("3_jkv2x")
+icon_alignment = 1
+expand_icon = true
+
+[node name="MarginContainer3" type="MarginContainer" parent="CanvasLayer/ui/TopPanel" unique_id=1600052215]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 50
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/ui/TopPanel/MarginContainer3" unique_id=267493631]
+layout_mode = 2
+mouse_filter = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="CanvasLayer/ui/TopPanel/MarginContainer3/HBoxContainer" unique_id=242178581]
 layout_mode = 2
 text = "Speed:"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="HSlider" type="HSlider" parent="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer2/CenterContainer/HBoxContainer" unique_id=1645180950]
+[node name="HSlider" type="HSlider" parent="CanvasLayer/ui/TopPanel/MarginContainer3/HBoxContainer" unique_id=1645180950]
 custom_minimum_size = Vector2(80, 25)
 layout_mode = 2
 size_flags_vertical = 4
@@ -127,8 +258,9 @@ value = 10.0
 tick_count = 5
 ticks_on_borders = true
 ticks_position = 3
+script = ExtResource("9_jscy8")
 
-[node name="Label2" type="Label" parent="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer2/CenterContainer/HBoxContainer" unique_id=907286264]
+[node name="Label2" type="Label" parent="CanvasLayer/ui/TopPanel/MarginContainer3/HBoxContainer" unique_id=907286264]
 custom_minimum_size = Vector2(40, 0)
 custom_maximum_size = Vector2(40, -1)
 layout_mode = 2
@@ -137,29 +269,145 @@ horizontal_alignment = 1
 vertical_alignment = 1
 script = ExtResource("2_jyhfs")
 
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer" unique_id=1957874801]
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/ui/TopPanel/MarginContainer3/HBoxContainer" unique_id=2102010289]
 layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
 theme_override_constants/margin_left = 15
 
-[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer" unique_id=631515231]
+[node name="ResetMapButton" type="Button" parent="CanvasLayer/ui/TopPanel/MarginContainer3/HBoxContainer/MarginContainer" unique_id=1799646558]
+custom_minimum_size = Vector2(35, 35)
+custom_maximum_size = Vector2(35, 35)
+layout_mode = 2
+tooltip_text = "Reset"
+focus_mode = 0
+icon = ExtResource("4_tefeu")
+icon_alignment = 1
+expand_icon = true
+
+[node name="MarginContainer4" type="MarginContainer" parent="CanvasLayer/ui/TopPanel" unique_id=768724748]
+custom_minimum_size = Vector2(0, 45)
+custom_maximum_size = Vector2(-1, 45)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -84.0
+offset_bottom = 45.0
+grow_horizontal = 0
+size_flags_horizontal = 10
+mouse_filter = 2
+theme_override_constants/margin_right = 15
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/ui/TopPanel/MarginContainer4" unique_id=1900265308]
+layout_mode = 2
+size_flags_vertical = 4
+alignment = 1
+
+[node name="LoadMapButton" type="Button" parent="CanvasLayer/ui/TopPanel/MarginContainer4/HBoxContainer" unique_id=2127342437]
+custom_minimum_size = Vector2(35, 35)
+custom_maximum_size = Vector2(35, 35)
+layout_mode = 2
+tooltip_text = "Load Map"
+focus_mode = 0
+icon = ExtResource("5_tipki")
+icon_alignment = 1
+expand_icon = true
+
+[node name="SaveMapButton" type="Button" parent="CanvasLayer/ui/TopPanel/MarginContainer4/HBoxContainer" unique_id=2014019759]
+custom_minimum_size = Vector2(35, 35)
+custom_maximum_size = Vector2(35, 35)
+layout_mode = 2
+tooltip_text = "Save Map"
+focus_mode = 0
+icon = ExtResource("6_85g3d")
+icon_alignment = 1
+expand_icon = true
+
+[node name="BottomPanel" type="Control" parent="CanvasLayer/ui" unique_id=1385186352]
+custom_minimum_size = Vector2(600, 45)
+custom_maximum_size = Vector2(600, 45)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="PanelContainer" type="PanelContainer" parent="CanvasLayer/ui/BottomPanel" unique_id=1029504402]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/ui/BottomPanel/PanelContainer" unique_id=1333043563]
+layout_mode = 2
+alignment = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer" unique_id=1472478148]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/margin_left = 10
+
+[node name="TimelineHSlider" type="HSlider" parent="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer" unique_id=1523060243]
+layout_mode = 2
+tick_count = 11
+ticks_on_borders = true
+ticks_position = 2
+script = ExtResource("10_gqmmt")
+
+[node name="MarginContainer2" type="MarginContainer" parent="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer" unique_id=1674262495]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/margin_left = 15
+
+[node name="Label" type="Label" parent="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer2" unique_id=703009422]
+layout_mode = 2
+text = "000"
+horizontal_alignment = 1
+vertical_alignment = 1
+script = ExtResource("11_yc10j")
+
+[node name="MarginContainer3" type="MarginContainer" parent="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer" unique_id=1957874801]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_right = 15
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer3" unique_id=399735059]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer" unique_id=399735059]
+[node name="FirstButton" type="Button" parent="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer3/HBoxContainer" unique_id=1706929884]
+custom_minimum_size = Vector2(35, 35)
+custom_maximum_size = Vector2(35, 35)
 layout_mode = 2
+focus_mode = 0
+disabled = true
+icon = ExtResource("4_a8y0u")
+icon_alignment = 1
+expand_icon = true
+script = ExtResource("10_jbj1t")
 
-[node name="PreviousButton" type="Button" parent="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer" unique_id=1936803897]
+[node name="PreviousButton" type="Button" parent="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer3/HBoxContainer" unique_id=1936803897]
 custom_minimum_size = Vector2(35, 35)
 custom_maximum_size = Vector2(35, 35)
 layout_mode = 2
 tooltip_text = "Previous Frame"
 focus_mode = 0
 disabled = true
-icon = ExtResource("4_a8y0u")
+icon = ExtResource("12_0ld40")
 icon_alignment = 1
 expand_icon = true
 script = ExtResource("5_jkv2x")
 
-[node name="PauseButton" type="Button" parent="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer" unique_id=1261752813]
+[node name="PauseButton" type="Button" parent="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer3/HBoxContainer" unique_id=1261752813]
 custom_minimum_size = Vector2(35, 35)
 custom_maximum_size = Vector2(35, 35)
 layout_mode = 2
@@ -172,7 +420,7 @@ icon_alignment = 1
 expand_icon = true
 script = ExtResource("5_choun")
 
-[node name="NextButton" type="Button" parent="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer" unique_id=1373787982]
+[node name="NextButton" type="Button" parent="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer3/HBoxContainer" unique_id=1373787982]
 custom_minimum_size = Vector2(35, 35)
 custom_maximum_size = Vector2(35, 35)
 layout_mode = 2
@@ -184,194 +432,40 @@ icon_alignment = 1
 expand_icon = true
 script = ExtResource("7_trceg")
 
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer" unique_id=2102010289]
-layout_mode = 2
-theme_override_constants/margin_left = 15
-
-[node name="ResetMapButton" type="Button" parent="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/MarginContainer" unique_id=1799646558]
+[node name="LastButton" type="Button" parent="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer3/HBoxContainer" unique_id=606015321]
 custom_minimum_size = Vector2(35, 35)
 custom_maximum_size = Vector2(35, 35)
 layout_mode = 2
-tooltip_text = "Reset"
 focus_mode = 0
-icon = ExtResource("4_tefeu")
+disabled = true
+icon = ExtResource("18_gqmmt")
 icon_alignment = 1
 expand_icon = true
-
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/ui" unique_id=866953754]
-custom_minimum_size = Vector2(0, 45)
-layout_mode = 0
-offset_right = 210.0
-offset_bottom = 45.0
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 8
-
-[node name="FoldableContainer" type="FoldableContainer" parent="CanvasLayer/ui/MarginContainer" unique_id=1093982107]
-custom_minimum_size = Vector2(200, 0)
-layout_mode = 2
-focus_mode = 0
-folded = true
-title = "Brush"
-title_alignment = 1
-
-[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/ui/MarginContainer/FoldableContainer" unique_id=106986063]
-visible = false
-layout_mode = 2
-
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer" unique_id=1167572177]
-layout_mode = 2
-alignment = 1
-
-[node name="SubViewportContainer" type="SubViewportContainer" parent="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer" unique_id=887282187]
-layout_mode = 2
-
-[node name="SubViewport" type="SubViewport" parent="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer" unique_id=1532299737]
-handle_input_locally = false
-size = Vector2i(160, 160)
-render_target_update_mode = 0
-
-[node name="BrushTileMapLayer" type="TileMapLayer" parent="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport" unique_id=1489927147]
-scale = Vector2(2, 2)
-tile_map_data = PackedByteArray("AAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAABAAEAAAABAAAAAAACAAEAAAABAAAAAAACAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAIAAAAAAAAAAAABAAIAAAABAAAAAAADAAEAAAAAAAAAAAADAAAAAAAAAAAAAAADAAIAAAABAAAAAAADAAMAAAAAAAAAAAACAAMAAAABAAAAAAABAAMAAAAAAAAAAAAAAAMAAAAAAAAAAAAEAAAAAAAAAAAAAAAEAAEAAAAAAAAAAAAEAAIAAAAAAAAAAAAEAAMAAAAAAAAAAAAEAAQAAAAAAAAAAAADAAQAAAAAAAAAAAACAAQAAAAAAAAAAAABAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAACAAIAAAAAAAAAAAA=")
-tile_set = SubResource("TileSet_keve6")
-script = ExtResource("3_sugp2")
-
-[node name="LoadBrushDialog" type="FileDialog" parent="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" unique_id=595352107]
-title = "Open a File"
-file_mode = 0
-display_mode = 1
-access = 2
-filters = PackedStringArray("*.brush")
-use_native_dialog = true
-
-[node name="SaveBrushDialog" type="FileDialog" parent="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" unique_id=1384218773]
-title = "Save Cursor"
-display_mode = 1
-access = 2
-filters = PackedStringArray("*.brush")
-use_native_dialog = true
-
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer" unique_id=525203878]
-layout_mode = 2
-alignment = 1
-
-[node name="LoadBrushButton" type="Button" parent="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/HBoxContainer" unique_id=255453109]
-custom_minimum_size = Vector2(35, 35)
-custom_maximum_size = Vector2(35, 35)
-layout_mode = 2
-tooltip_text = "Load Brush"
-focus_mode = 0
-icon = ExtResource("5_tipki")
-icon_alignment = 1
-expand_icon = true
-
-[node name="SaveBrushButton" type="Button" parent="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/HBoxContainer" unique_id=737644124]
-custom_minimum_size = Vector2(35, 35)
-custom_maximum_size = Vector2(35, 35)
-layout_mode = 2
-tooltip_text = "Save Brush"
-focus_mode = 0
-icon = ExtResource("6_85g3d")
-icon_alignment = 1
-expand_icon = true
-
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/HBoxContainer" unique_id=357403993]
-layout_mode = 2
-theme_override_constants/margin_left = 45
-
-[node name="ResetBrushButton" type="Button" parent="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/HBoxContainer/MarginContainer" unique_id=1609683271]
-custom_minimum_size = Vector2(35, 35)
-custom_maximum_size = Vector2(35, 35)
-layout_mode = 2
-tooltip_text = "Reset Brush"
-focus_mode = 0
-icon = ExtResource("4_tefeu")
-icon_alignment = 1
-expand_icon = true
-
-[node name="MarginContainer2" type="MarginContainer" parent="CanvasLayer/ui" unique_id=1316299469]
-custom_minimum_size = Vector2(0, 45)
-custom_maximum_size = Vector2(-1, 45)
-propagate_maximum_size = false
-layout_mode = 1
-offset_right = 45.000015
-offset_bottom = 45.0
-size_flags_horizontal = 0
-theme_override_constants/margin_left = 220
-
-[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/ui/MarginContainer2" unique_id=1613800938]
-layout_mode = 2
-
-[node name="OverlayButton" type="Button" parent="CanvasLayer/ui/MarginContainer2/CenterContainer" unique_id=1052449595]
-custom_minimum_size = Vector2(35, 35)
-custom_maximum_size = Vector2(35, 35)
-layout_mode = 2
-tooltip_text = "Overlays"
-focus_mode = 0
-toggle_mode = true
-icon = ExtResource("3_jkv2x")
-icon_alignment = 1
-expand_icon = true
-
-[node name="MarginContainer3" type="MarginContainer" parent="CanvasLayer/ui" unique_id=768724748]
-custom_minimum_size = Vector2(0, 45)
-custom_maximum_size = Vector2(-1, 45)
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -84.0
-offset_bottom = 35.0
-grow_horizontal = 0
-size_flags_horizontal = 10
-theme_override_constants/margin_right = 10
-
-[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/ui/MarginContainer3" unique_id=1951904203]
-layout_mode = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/ui/MarginContainer3/CenterContainer" unique_id=1900265308]
-layout_mode = 2
-alignment = 1
-
-[node name="LoadMapButton" type="Button" parent="CanvasLayer/ui/MarginContainer3/CenterContainer/HBoxContainer" unique_id=2127342437]
-custom_minimum_size = Vector2(35, 35)
-custom_maximum_size = Vector2(35, 35)
-layout_mode = 2
-tooltip_text = "Load Map"
-focus_mode = 0
-icon = ExtResource("5_tipki")
-icon_alignment = 1
-expand_icon = true
-
-[node name="SaveMapButton" type="Button" parent="CanvasLayer/ui/MarginContainer3/CenterContainer/HBoxContainer" unique_id=2014019759]
-custom_minimum_size = Vector2(35, 35)
-custom_maximum_size = Vector2(35, 35)
-layout_mode = 2
-tooltip_text = "Save Map"
-focus_mode = 0
-icon = ExtResource("6_85g3d")
-icon_alignment = 1
-expand_icon = true
+script = ExtResource("17_muem4")
 
 [connection signal="resized" from="game/SubViewportContainer" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_viewport_resized"]
-[connection signal="pause_changed" from="game/SubViewportContainer/SubViewport/GameScn" to="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/PreviousButton" method="_on_pause_changed"]
-[connection signal="pause_changed" from="game/SubViewportContainer/SubViewport/GameScn" to="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/PauseButton" method="_on_pause_changed"]
-[connection signal="pause_changed" from="game/SubViewportContainer/SubViewport/GameScn" to="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/NextButton" method="_on_pause_changed"]
-[connection signal="undo_changed" from="game/SubViewportContainer/SubViewport/GameScn" to="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/PreviousButton" method="_on_undo_changed"]
-[connection signal="undo_changed" from="game/SubViewportContainer/SubViewport/GameScn" to="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/NextButton" method="_on_undo_changed"]
+[connection signal="pause_changed" from="game/SubViewportContainer/SubViewport/GameScn" to="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer3/HBoxContainer/FirstButton" method="_on_pause_changed"]
+[connection signal="pause_changed" from="game/SubViewportContainer/SubViewport/GameScn" to="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer3/HBoxContainer/PreviousButton" method="_on_pause_changed"]
+[connection signal="pause_changed" from="game/SubViewportContainer/SubViewport/GameScn" to="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer3/HBoxContainer/PauseButton" method="_on_pause_changed"]
+[connection signal="pause_changed" from="game/SubViewportContainer/SubViewport/GameScn" to="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer3/HBoxContainer/NextButton" method="_on_pause_changed"]
+[connection signal="pause_changed" from="game/SubViewportContainer/SubViewport/GameScn" to="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer3/HBoxContainer/LastButton" method="_on_pause_changed"]
 [connection signal="file_selected" from="game/SubViewportContainer/SubViewport/GameScn/LoadMapDialog" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_load_map_from_file"]
 [connection signal="file_selected" from="game/SubViewportContainer/SubViewport/GameScn/SaveMapDialog" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_save_map_to_file"]
-[connection signal="value_changed" from="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer2/CenterContainer/HBoxContainer/HSlider" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_speed_changed"]
-[connection signal="value_changed" from="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer2/CenterContainer/HBoxContainer/HSlider" to="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer2/CenterContainer/HBoxContainer/Label2" method="_on_h_slider_value_changed"]
-[connection signal="pressed" from="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/PreviousButton" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_undo_pressed"]
-[connection signal="toggled" from="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/PauseButton" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_pause_toggled"]
-[connection signal="pressed" from="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/NextButton" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_next_frame_pressed"]
-[connection signal="pressed" from="CanvasLayer/ui/PanelContainer/MarginContainer/HBoxContainer/MarginContainer/CenterContainer/HBoxContainer/MarginContainer/ResetMapButton" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_reset_pressed"]
-[connection signal="file_selected" from="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer/LoadBrushDialog" to="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" method="_on_load_brush_from_file"]
-[connection signal="file_selected" from="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer/SaveBrushDialog" to="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" method="_on_save_brush_to_file"]
-[connection signal="pressed" from="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/HBoxContainer/LoadBrushButton" to="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" method="load_brush"]
-[connection signal="pressed" from="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/HBoxContainer/SaveBrushButton" to="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" method="save_brush"]
-[connection signal="pressed" from="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/HBoxContainer/MarginContainer/ResetBrushButton" to="CanvasLayer/ui/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" method="reset_brush"]
-[connection signal="toggled" from="CanvasLayer/ui/MarginContainer2/CenterContainer/OverlayButton" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_overlay_toggled"]
-[connection signal="pressed" from="CanvasLayer/ui/MarginContainer3/CenterContainer/HBoxContainer/LoadMapButton" to="game/SubViewportContainer/SubViewport/GameScn" method="load_map"]
-[connection signal="pressed" from="CanvasLayer/ui/MarginContainer3/CenterContainer/HBoxContainer/SaveMapButton" to="game/SubViewportContainer/SubViewport/GameScn" method="save_map"]
+[connection signal="file_selected" from="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer/LoadBrushDialog" to="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" method="_on_load_brush_from_file"]
+[connection signal="file_selected" from="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer/SaveBrushDialog" to="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" method="_on_save_brush_to_file"]
+[connection signal="pressed" from="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/HBoxContainer/LoadBrushButton" to="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" method="load_brush"]
+[connection signal="pressed" from="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/HBoxContainer/SaveBrushButton" to="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" method="save_brush"]
+[connection signal="pressed" from="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/HBoxContainer/MarginContainer/ResetBrushButton" to="CanvasLayer/ui/TopPanel/MarginContainer/FoldableContainer/CenterContainer/VBoxContainer/SubViewportContainer/SubViewport/BrushTileMapLayer" method="reset_brush"]
+[connection signal="toggled" from="CanvasLayer/ui/TopPanel/MarginContainer2/CenterContainer/OverlayButton" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_overlay_toggled"]
+[connection signal="value_changed" from="CanvasLayer/ui/TopPanel/MarginContainer3/HBoxContainer/HSlider" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_speed_changed"]
+[connection signal="value_changed" from="CanvasLayer/ui/TopPanel/MarginContainer3/HBoxContainer/HSlider" to="CanvasLayer/ui/TopPanel/MarginContainer3/HBoxContainer/Label2" method="_on_h_slider_value_changed"]
+[connection signal="pressed" from="CanvasLayer/ui/TopPanel/MarginContainer3/HBoxContainer/MarginContainer/ResetMapButton" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_reset_pressed"]
+[connection signal="pressed" from="CanvasLayer/ui/TopPanel/MarginContainer4/HBoxContainer/LoadMapButton" to="game/SubViewportContainer/SubViewport/GameScn" method="load_map"]
+[connection signal="pressed" from="CanvasLayer/ui/TopPanel/MarginContainer4/HBoxContainer/SaveMapButton" to="game/SubViewportContainer/SubViewport/GameScn" method="save_map"]
+[connection signal="timeline_seeked" from="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer/TimelineHSlider" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_timeline_seeked"]
+[connection signal="value_changed" from="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer/TimelineHSlider" to="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer/TimelineHSlider" method="_on_value_changed"]
+[connection signal="pressed" from="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer3/HBoxContainer/FirstButton" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_first_frame_pressed"]
+[connection signal="pressed" from="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer3/HBoxContainer/PreviousButton" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_prev_frame_pressed"]
+[connection signal="toggled" from="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer3/HBoxContainer/PauseButton" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_pause_toggled"]
+[connection signal="pressed" from="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer3/HBoxContainer/NextButton" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_next_frame_pressed"]
+[connection signal="pressed" from="CanvasLayer/ui/BottomPanel/PanelContainer/HBoxContainer/MarginContainer3/HBoxContainer/LastButton" to="game/SubViewportContainer/SubViewport/GameScn" method="_on_last_frame_pressed"]

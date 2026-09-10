@@ -4,6 +4,9 @@ using Godot.Collections;
 
 public partial class GameState : Node
 {
+	[Signal]
+	public delegate void TimelineUpdatedEventHandler();
+	
 	public static GameState Instance { get; private set; }
 
 	[Flags]
@@ -51,18 +54,19 @@ public partial class GameState : Node
 		}
 	}
 	
-	public CircularArray<GridState> StateBuffer;
-	public byte[] Grid => StateBuffer.Head.Grid;
-	public byte[] Neighbors => StateBuffer.Head.Neighbors;
-	public byte[] SectionGrid => StateBuffer.Head.SectionGrid;
-	
-	public bool IsBufferLoaded;
-	
+	public CircularBuffer<GridState> Timeline;
+	public byte[] Grid => Timeline.Head.Grid;
+	public byte[] Neighbors => Timeline.Head.Neighbors;
+	public byte[] SectionGrid => Timeline.Head.SectionGrid;
+	public byte[] DrawSection = [];
+	public Array<Array<Array<Vector2I>>> SectionNeighbors = [];
 	public byte[] Brush = new byte[25];
-    public Array<Array<Array<Vector2I>>> SectionNeighbors = [];
-
-    public GridState Current => IsBufferLoaded ? StateBuffer[-1] : StateBuffer.Head;
-
+	
+	public int CurrentIndex => Timeline.HeadOffset - 1;
+	public GridState Current => Timeline[CurrentIndex];
+	public int CurrentFrame => CurrentIndex + Timeline.LifetimeCount - Timeline.Count;
+	
+	public bool IsBufferLoaded = false;
     public bool IsPaused = false;
     public float UpdateSpeed;
 
@@ -70,14 +74,18 @@ public partial class GameState : Node
     {
         Instance = this;
     }
+    
+    public bool AtTimelineHead() => Timeline.HeadOffset == Timeline.Count - 1;
 
     public void Init()
     {
 	    _initSectionNeighbors();
-	    StateBuffer = new CircularArray<GridState>(
+	    Timeline = new CircularBuffer<GridState>(
 		    Settings.Instance.Game.UndoCount + 2, 
 		    () => new GridState());
-	    StateBuffer.Save(GridState.Default, GridState.Copy);
+	    Timeline.SaveAtHead(GridState.Default, GridState.Copy);
+	    System.Array.Resize(ref DrawSection, SectionGrid.Length);
+	    System.Array.Fill(DrawSection, (byte)SectionFlag.Draw);
 	    IsBufferLoaded = true;
     }
 
@@ -122,44 +130,80 @@ public partial class GameState : Node
 	    }
     }
 
+    public void OnTimelineUpdated()
+    {
+	    EmitSignal(SignalName.TimelineUpdated);
+    }
+    
     public void EditBrush(Vector2I pos, byte value)
     {
 	    Brush[GridUtils.GetPackedIndex(new Vector2I(5, 5), pos)] = value;
     }
     
-    public void ClearStateBuffer()
+    public void ResetTimeline()
     {
-	    StateBuffer.Clear();
-	    StateBuffer.Save(GridState.Default, GridState.Copy);
+	    Timeline.Clear();
+	    Timeline.SaveAtHead(GridState.Default, GridState.Copy);
+	    System.Array.Fill(DrawSection, (byte)SectionFlag.Draw);
 	    IsBufferLoaded = true;
     }
     
     public void SaveState()
     {
-	    StateBuffer.Save(StateBuffer.Head, GridState.Copy);
+	    Timeline.SaveAtHead(Timeline.Head, GridState.Copy);
+	    IsBufferLoaded = false;
     }
 
-    public bool CanUndo()
+    public bool CanUndo() => Timeline.HeadOffset > 1;
+    
+    public void ResetBuffer()
     {
-	    return StateBuffer.Count > 2 + (IsBufferLoaded ? 1 : 0);
+	    Timeline.RemoveAtHead();
+	    SaveState();
+	    for (var i = 0; i < SectionGrid.Length; i++)
+		    DrawSection[i] = (byte)(SectionGrid[i] & (byte)SectionFlag.Draw);
     }
     
-    public void DiscardBuffer()
+    public void SeekTimeline(int index = -1)
     {
-	    StateBuffer.RemoveTop();
-	    IsBufferLoaded = false;
+	    if (index == Timeline.HeadOffset || Timeline.IsEmpty()) return;
+	    if(index == -1)
+	    {
+		    SeekTimeline(Timeline.Count - 2);
+		    return;
+	    }
+
+	    if (index - Timeline.HeadOffset == 1)
+	    {
+		    Redo();
+		    return;
+	    }
+
+	    if (index - Timeline.HeadOffset == -2)
+	    {
+		    Undo();
+		    return;
+	    }
+	    
+	    Timeline.SetHead(index);
+	    System.Array.Fill(DrawSection, (byte)SectionFlag.Draw);
     }
     
     public void Undo()
     {
-	    if (!CanUndo()) return;
-	    DiscardBuffer();
-	    
-	    var oldSectionGrid = SectionGrid;
-	    StateBuffer.RemoveTop();
+	    Timeline.ShiftHead(-1);
 	    for (var i = 0; i < SectionGrid.Length; i++)
-		    SectionGrid[i] |= (byte)(oldSectionGrid[i] & (byte)SectionFlag.Draw);
-	    IsBufferLoaded = true;
+		    DrawSection[i] = (byte)(SectionGrid[i] & (byte)SectionFlag.Draw);
+	    Timeline.ShiftHead(-1);
+	    for (var i = 0; i < SectionGrid.Length; i++)
+		    DrawSection[i] |= (byte)(SectionGrid[i] & (byte)SectionFlag.Draw);
+    }
+
+    public void Redo()
+    {
+	    Timeline.ShiftHead(1);
+	    for (var i = 0; i < SectionGrid.Length; i++)
+		    DrawSection[i] = (byte)(SectionGrid[i] & (byte)SectionFlag.Draw);
     }
     
 }

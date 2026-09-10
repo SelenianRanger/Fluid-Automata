@@ -22,13 +22,13 @@ public partial class GameGrid : Node
 
 	public void ResetGrid()
 	{
-		GameState.Instance.ClearStateBuffer();
+		GameState.Instance.ResetTimeline();
 		UpdateTick();
 	}
 	
 	public void ResetGrid(byte[] fill)
 	{
-		GameState.Instance.ClearStateBuffer();
+		GameState.Instance.ResetTimeline();
 		fill.AsSpan().CopyTo(GameState.Instance.Grid);
 		Array.Fill(GameState.Instance.SectionGrid, 
 			(byte)(GameState.SectionFlag.Draw | GameState.SectionFlag.Process));
@@ -38,10 +38,7 @@ public partial class GameGrid : Node
 	public void OnPaintStart()
 	{
 		if (GameState.Instance.IsBufferLoaded)
-		{
-			GameState.Instance.DiscardBuffer();
-			GameState.Instance.SaveState();
-		}
+			GameState.Instance.ResetBuffer();
 		PostDrawCleanup();
 	}
 
@@ -49,9 +46,11 @@ public partial class GameGrid : Node
 	{
 		GameState.Instance.SaveState();
 		BufferNextFrame();
+		PreDraw();
+		GameState.Instance.OnTimelineUpdated();
 	}
 	
-	public void SetTile(Vector2I pos, byte value)
+	public void PaintTile(Vector2I pos, byte value)
 	{
 		var index = GridUtils.GetPackedIndex(Settings.Instance.Game.GridSize, pos);
 		if (GameState.Instance.Grid[index] == value) return;
@@ -143,12 +142,6 @@ public partial class GameGrid : Node
 			Settings.Instance.Game.SectionGridSize.X * Settings.Instance.Game.SectionGridSize.Y);
 		WorkerThreadPool.WaitForGroupTaskCompletion(taskId);
 	}
-
-	public void Undo()
-	{
-		GameState.Instance.Undo();
-		UpdateTick();
-	}
 	
 	public void BufferNextFrame()
 	{
@@ -156,6 +149,13 @@ public partial class GameGrid : Node
 		UpdateGrid();
 	}
 
+	public void PreDraw()
+	{
+		for (var i = 0; i < GameState.Instance.SectionGrid.Length; i++)
+			GameState.Instance.DrawSection[i] = 
+				(byte)(GameState.Instance.SectionGrid[i] & (byte)GameState.SectionFlag.Draw);
+	}
+	
 	public void PostDrawCleanup()
 	{
 		for (var i = 0; i < GameState.Instance.SectionGrid.Length; i++)
@@ -164,13 +164,25 @@ public partial class GameGrid : Node
 	
 	public void UpdateTick()
 	{
-		if (!GameState.Instance.IsBufferLoaded) return;
+		if (!GameState.Instance.IsBufferLoaded && 
+		    GameState.Instance.AtTimelineHead()) return;
+		// draw from buffered frame
 		EmitSignal(SignalName.OverlaysUpdated);
 		EmitSignal(SignalName.GridUpdated);
-		GameState.Instance.SaveState();
-		GameState.Instance.IsBufferLoaded = false;
-		PostDrawCleanup();
-		BufferNextFrame();
+		
+		// buffer next frame
+		if (GameState.Instance.AtTimelineHead())
+		{
+			GameState.Instance.SaveState();
+			PostDrawCleanup();
+			BufferNextFrame();
+			PreDraw();
+		}
+		else
+		{
+			GameState.Instance.Redo();
+		}
+		GameState.Instance.OnTimelineUpdated();
 	}
 	
 }
